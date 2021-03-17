@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name=author content="GEM">
+    <title></title>
+    <link rel='stylesheet' href="../static/style.css">
+     
+</head>
+<body>
+
+<!---->
+<form class="search" method="POST" action= "{{ url_for('listingReturn') }}">
+    <p><label>Item Name (model, make, and/or brand): <input type="text" name="name"></label>
+    <p><label>Item Description: <input type="text" name="description"></label></p>
+    <p><label>Condition: <input type="text" name="condition"></label></p>
+    <p><label>Selling Mode: 
+        <input type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
+        <label for="sell">Sell</label>
+        <input type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
+        <label for="sell">Rent</label>
+        <input type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
+        <label for="sell">Trade</label>
+        <!--Rethink "Free" Checkbox-->
+        <input type="checkbox" id = "sellmode4" name="sellmode4" value = "free">
+        <label for="sell">Free</label>
+    </label></p>
+    <p><label>Price: <input type = "number" id="price" name="price"></label></p>
+    <!--<label>kind
+            <select name="kind">
+                <option value="">choose one</option>
+                <option value="person">person name</option>
+                <option value="movie">movie title</option>
+            </select>
+    </label>-->
+    <input type="submit" value="search"></p>
+</form>
+            
+{% block information %}
+<h1>About</h1>
+
+<p>This application is a simple knockoff of the 
+    <a href="https://www.imdb.com/">IMDB</a>
+</p>
+
+<p>An example of an actor: 
+    <a href="/cs304lookup/nm/123">George Clooney</a></p>
+
+<p>An example of a movie: 
+    <a href="/cs304lookup/tt/120780">Out of Sight (1998)</a></p>
+
+<p>V 1.1, Sept 20, 2020, to fix the display of people w/ null addedby</p>
+{% endblock %}
+
+</body>
+</html>
