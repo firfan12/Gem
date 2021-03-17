@@ -1,3 +1,4 @@
+-- comment
 use gem_db;
 
 drop table if exists comments; 
