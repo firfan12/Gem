@@ -8,6 +8,7 @@ app = Flask(__name__)
 # change comment characters to switch to SQLite
 
 import cs304dbi as dbi
+import listing
 # import cs304dbi_sqlite3 as dbi
 
 import random
@@ -17,16 +18,19 @@ def listingForm():
     return render_template("listingForm.html")
 
 #Form Result Function
-@app.route("/listingresult/",methods=['POST','GET'])
+@app.route("/listing/",methods=['POST','GET'])
 def listingReturn():
+    conn = dbi.connect()
     if request.method == 'POST':
-        price = request.form["price"]
-        print(price)
-        template = '''<h1>Here's what we got from you!</h1>
-             <p>Price: {priceInput} </p>
-             <p>Description:</p>
+        nameInput = request.form['name']
+        descriptionInput = request.form['description']
+        template = '''<h1>Here's what we got from you! - only description for now</h1>
+            <p>Name: {nameInput1}</p>
+             <p>Description: {descriptionInput1}</p>
            '''
-        page = template.format(priceInput = price)
+        page = template.format(nameInput1=nameInput, descriptionInput1=descriptionInput)
+        #insert item description
+        listing.insertListing(conn,nameInput,descriptionInput)
         return page
 
 #Redirect Function, possibly omit
@@ -37,6 +41,8 @@ def listingRedirect():
     return redirect(url_for("listingReturn", price = price, description = description))
 
 if __name__ == '__main__':
+    dbi.cache_cnf()  
+    dbi.use('gem_db')
     import sys, os
     if len(sys.argv) > 1:
         # arg, if any, is the desired port number
