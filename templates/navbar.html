@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+   <title>Bootstrap Example</title>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+   <link rel='stylesheet' href='../static/styles.css'>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   <style>
+       .dropdown {
+           position: static !important;
+       }
+        
+       .dropdown-menu {
+           box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15)!important;
+           margin-top: 0px !important;
+           width: 100% !important;
+       }
+   </style>
+</head>
+ 
+<body style="height:1500px">
+ 
+   <nav class="navbar navbar-inverse navbar-fixed-top">
+       <div class="container-fluid">
+           <div class="navbar-header">
+               <a class="navbar-brand" href="#">Gem</a>
+           </div>
+           <ul class="nav navbar-nav">
+               <li class="active"><a href="#">Home</a></li>
+               <!-- <li><a href="#">Page 1</a></li>
+               <li><a href="#">Page 2</a></li>
+               <li><a href="#">Page 3</a></li> -->
+               <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Browse Listings<span
+                           class="caret"></span></a>
+                   <ul class="dropdown-menu">
+                       <li><a href="#">By Category</a></li>
+                       <li><a href="#">By Price</a></li>
+                       <li><a href="#">By Condition</a></li>
+                       <li><a href="#">By Location</a></li>
+                   </ul>
+               </li>
+           </ul>
+           <form class="navbar-form navbar-right" action="/action_page.php">
+               <div class="form-group">
+                   <input type="text" class="form-control" placeholder="Search" name="search">
+               </div>
+               <button type="submit" class="btn btn-default">Submit</button>
+           </form>
+           <ul class="nav navbar-nav navbar-right">
+               <li><a href="#"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+               <li><a href="#"><span class="glyphicon glyphicon-heart"></span> Favorites</a></li>
+           </ul>
+           <a href = "listing/templates/listingForm.html">
+                <button class="btn btn-danger navbar-btn">List an Item to Sell</button>
+            </a>
+       </div>
+   </nav>
+ 
+   <div class="container" style="margin-top:50px">
+       <h3>Fixed Navbar</h3>
+       <div class="row">
+           <div class="col-md-4">
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+           </div>
+           <div class="col-md-4">
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+           </div>
+           <div class="col-md-4">
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+               <p>A fixed navigation bar stays visible in a fixed position (top or bottom) independent of the page
+                   scroll.</p>
+           </div>
+       </div>
+   </div>
+ 
+   <h1>Scroll this page to see the effect</h1>
+ 
+</body>
+ 
+</html>
+ 
+ 
+‘Clothing’, ‘Accessories’, ‘Dorm Essentials’, ‘Beauty’, ‘School Supplies’, ‘Tech’, ‘Furniture’, ‘Textbooks’, ‘Food’, ‘Other’
