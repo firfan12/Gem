@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block head_stuff %} 
+<style>
+    div.gallery {
+      margin: 5px;
+      border: 1px solid #ccc;
+      float: left;
+      width: 180px;
+    }
+    
+    div.gallery:hover {
+      border: 1px solid #777;
+    }
+    
+    div.gallery img {
+      width: 100%;
+      height: auto;
+    }
+    
+    div.desc {
+      padding: 15px;
+      text-align: center;
+    }
+    </style>
+
+{% endblock %}
+
+{% block main_content %}
+    <!-- listing dictionaries -->
+    {%for listing in listings %}
+    <!-- create a listing: div or figure-->
+            <div class="gallery" >
+                <!-- {{listing.image}} -->
+                <a target="_blank" href="{{url_for('itemPage', item_identifier = listing.item_id)}}">
+                <img src="../static/product1.jpeg" alt="Cinque Terre" width="600" height="400">
+                </a>
+                <div class="desc">Item: {{listing.item_name}} and Price:  {{listing.price}}</div>
+            </div>
+    {% endfor %}
+    <!-- css: inline block, width < 100% -->
+    <!-- https://www.w3schools.com/css/css_image_gallery.asp -->
+
+
+
+    
+    
+      
+      
+      
+
+
+{% endblock %}

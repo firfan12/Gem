@@ -33,12 +33,27 @@ def listingReturn():
         listing.insertListing(conn,nameInput,descriptionInput)
         return page
 
+
 #Redirect Function, possibly omit
-@app.route("/listingredirect/")
-def listingRedirect():
-    price = request.args.get('price')
-    description = request.args.get('description')
-    return redirect(url_for("listingReturn", price = price, description = description))
+@app.route("/feed/")
+def feed():
+    conn = dbi.connect()
+    results =  listing.getListings(conn)
+    # price = results['price']
+    # name = results['item_name']
+    # image = results['item_name']
+    return render_template("listingFeed.html", listings = results)
+
+
+
+#Redirect Function, possibly omit
+@app.route("/item/<item_identifier>")
+def itemPage(item_identifier):
+    conn = dbi.connect()
+    item = getListing(conn, item_identifier)
+    return render_template("listingPage.html", listing = item)
+    
+
 
 if __name__ == '__main__':
     dbi.cache_cnf()  
