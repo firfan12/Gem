@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block head_stuff %}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+    body {
+        font-family: "Times New Roman", Georgia, Serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: "Playfair Display";
+        letter-spacing: 5px;
+
+    }
+
+    #menu {
+
+        padding: 2em;
+    }
+</style>
+{% endblock %}
+{% block main_content %}
+<!-- all information -->
+<!-- pass in listing -->
+
+<!-- https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_templates_gourmet_catering&stacked=h -->
+{% for listing in listing %}
+<!-- Item Section -->
+<div class="w3-row w3-padding-64" id="menu">
+    <div class="w3-col l6 w3-padding-large">
+        <h1 class="w3-center">Item Name: {{listing.item_name}}</h1><br>
+        <h4>Seller contact information:</h4>
+        <p class="w3-text-grey">{{listing.seller_id}}</p><br>
+
+        <h4>Category</h4>
+        <p class="w3-text-grey">{{listing.category}}</p><br>
+
+        <h4>Status</h4>
+        <p class="w3-text-grey">{{listing.status}}</p><br>
+
+        <h4>Condition</h4>
+        <p class="w3-text-grey">{{listing.item_condition}}</p><br>
+
+        <h4>Description</h4>
+        <p class="w3-text-grey">{{listing.item_description}}</p>
+
+        <h4>Price</h4>
+        <p class="w3-text-grey">{{listing.price}}</p>
+    </div>
+
+    <div class="w3-col l6 w3-padding-large">
+        <img src="../static/product1.jpeg" class="w3-round w3-image w3-opacity-min" alt="{{listing.item_name}}"
+            style="width:100%">
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

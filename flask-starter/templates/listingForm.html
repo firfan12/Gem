@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block head_stuff %}
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+    body {
+        font-family: "Times New Roman", Georgia, Serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: "Playfair Display";
+        letter-spacing: 5px;
+        text-align: center;
+
+    }
+
+    #menu {
+
+        padding: 2em;
+    }
+</style>
+{% endblock %}   
+
+
+
+
+{% block main_content %}
+
+<!-- https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_templates_gourmet_catering&stacked=h -->
+
+  <div class="w3-container w3-padding-64" id="contact">
+    <h1>Sell your stuff that  you no longer use! </h1><br>
+    <p>Have stuff in your room that you never use? List it for sale and make some $$!</p>
+    <p>You can always delete or update an item listing later.</p>
+    <form target="_blank" class="search" method="POST" action= "{{ url_for('listingReturn') }}">
+      <p><input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="Name">Item Name (model, make, and/or brand):</p>
+      <p> </p>
+      <p><input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required name="Description">Item Description:</p>
+      <p><input class="w3-input w3-padding-16" type="text" placeholder="Item's condition" required name="condition">Condition:</p>
+      <p> </p>
+      <!-- <p><input class="w3-input w3-padding-16" type="text" placeholder="Message \ Special requirements" required name="Message">Selling Mode:</p> -->
+      <p><label>Selling Mode (can be more than one): 
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode1"  name="sellmode1" value = "sell">
+        <label for="sell">Sell</label>
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode2"  name="sellmode2" value = "rent">
+        <label for="sell">Rent</label>
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode3"  name="sellmode3" value = "trade">
+        <label for="sell">Trade</label>
+     </label></p>
+     <p><input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price">Price in dollars:</p>
+     <p> </p>
+     <p><button class="w3-button w3-light-grey w3-section" type="submit">Create listing</button></p>
+      
+      <!-- value="2020-11-16T20:00"...  label? req  them to select 1 checkbox.-->
+    </form>
+  </div>
+
+
+<!---->
+<!-- <form class="search" method="POST" action= "{{ url_for('listingReturn') }}">
+    <p><label>Item Name (model, make, and/or brand): <input type="text" name="name"></label>
+    <p><label>Item Description: <input type="text" name="description"></label></p>
+    <p><label>Condition: <input type="text" name="condition"></label></p>
+    <p><label>Selling Mode: 
+        <input type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
+        <label for="sell">Sell</label>
+        <input type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
+        <label for="sell">Rent</label>
+        <input type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
+        <label for="sell">Trade</label>
+       
+        <input type="checkbox" id = "sellmode4" name="sellmode4" value = "free">
+        <label for="sell">Free</label>
+    </label></p>
+    <p><label>Price: <input type = "number" id="price" name="price"></label></p> -->
+    <!--<label>kind
+            <select name="kind">
+                <option value="">choose one</option>
+                <option value="person">person name</option>
+                <option value="movie">movie title</option>
+            </select>
+    </label>-->
+    <!-- <input type="submit" value="search"></p>
+</form> -->
+         
+{% endblock %}
+
