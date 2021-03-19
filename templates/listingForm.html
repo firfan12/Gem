@@ -1,56 +1,72 @@
+<!--
+    File Name: listingForm.html
+    Project: GEM
+    Purpose: Sellers fill this form out to create a new listing.
+    Date: Spring 2021
+-->
 <!doctype html>
 <html lang='en'>
 <head>
     <meta charset='utf-8'>
     <meta name=author content="GEM">
-    <title></title>
+    <title>Create A Listing</title>
     <link rel='stylesheet' href="../static/style.css">
-     
 </head>
 <body>
-
-<!---->
+<h1>Create A Listing</h1>
 <form class="search" method="POST" action= "{{ url_for('listingReturn') }}">
-    <p><label>Item Name (model, make, and/or brand): <input type="text" name="name"></label>
-    <p><label>Item Description: <input type="text" name="description"></label></p>
-    <p><label>Condition: <input type="text" name="condition"></label></p>
-    <p><label>Selling Mode: 
-        <input type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
-        <label for="sell">Sell</label>
-        <input type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
-        <label for="sell">Rent</label>
-        <input type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
-        <label for="sell">Trade</label>
-        <!--Rethink "Free" Checkbox-->
-        <input type="checkbox" id = "sellmode4" name="sellmode4" value = "free">
-        <label for="sell">Free</label>
+    <p><label>Name (model, make, and/or brand): <input type="text" name="name"></label>
+    <p><label>Category:
+        <input type = checkbox  name = "category1" value ="Clothing">
+        <label for="category1">Clothing</label>
+        <input type = checkbox  name = "category2" value ="Accessories">
+        <label for = "category2">Accessories</label>
+        <input type = checkbox  name = "category3" value ="Dorm Essentials">
+        <label for = "category3">Dorm Essentials</label>
+        <input type = checkbox  name = "category4" value ="Beauty">
+        <label for = "category4">Beauty</label>
+        <input type = checkbox  name = "category5" value ="School Supplies">
+        <label for = "category5">School Supplies</label>
+        <input type = checkbox  name = "category6" value ="Tech">
+        <label for = "category6">Tech</label>
+        <input type = checkbox  name = "category7" value ="Furniture">
+        <label for = "category7">Furniture</label>
+        <input type = checkbox  name = "category8" value ="Textbooks">
+        <label for = "category8">Textbooks</label>
+        <input type = checkbox  name = "category9" value ="Food">
+        <label for = "category9">Food</label>
+        <label for = "category10">Other: </label>
+        <input type = text name = "category10" value = "Other">
+    <p><label>Description: <input type="text" name="description"></label></p>
+    <p><label>Condition:
+        <input type="radio" name="condition" value="Brand New">
+        <label for="Brand New">Brand New</label>
+        <input type="radio" name="condition" value="Gently Used">
+        <label for="Gently Used">Gently Used</label>
+        <input type="radio" name="condition" value="Well Loved">
+        <label for="Well Loved">Well Loved</label>
     </label></p>
-    <p><label>Price: <input type = "number" id="price" name="price"></label></p>
-    <!--<label>kind
-            <select name="kind">
-                <option value="">choose one</option>
-                <option value="person">person name</option>
-                <option value="movie">movie title</option>
-            </select>
-    </label>-->
-    <input type="submit" value="search"></p>
+    <!--No database equivalent, yet.-->
+    <!--<p><label>Available for: 
+        <input type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
+        <label for="sellmode1">Sell</label>
+        <input type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
+        <label for="sellmode2">Rent</label>
+        <input type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
+        <label for="sellmode3">Trade</label>
+    </label></p>-->
+    <p><label>For Free or For Price:
+        <input type="radio" name="ffofp" value="free">
+        <label for="free">Free</label>
+        <input type="radio" name="ffofp" value="priced">
+        <label for="priced">Set A Price</label>
+    </label></p>
+    <!--Show when radio button "Set A Price" is selected.-->
+    <div id = pricesetter>
+        <p><label>Set A Price: <input type = "text" name="price"></label></p>
+    </div>
+    <input type="submit" value="Create A Listing"></p>
 </form>
-            
-{% block information %}
-<h1>About</h1>
-
-<p>This application is a simple knockoff of the 
-    <a href="https://www.imdb.com/">IMDB</a>
-</p>
-
-<p>An example of an actor: 
-    <a href="/cs304lookup/nm/123">George Clooney</a></p>
-
-<p>An example of a movie: 
-    <a href="/cs304lookup/tt/120780">Out of Sight (1998)</a></p>
-
-<p>V 1.1, Sept 20, 2020, to fix the display of people w/ null addedby</p>
-{% endblock %}
 
 </body>
 </html>

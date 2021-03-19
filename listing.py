@@ -1,16 +1,30 @@
 import cs304dbi as dbi
 
-seller_id = "rarango@wellesley.edu"
+#For the time being, there is one seller and her ID is:
+sellerID = "rarango@wellesley.edu"
 
-#Insert new listing.
-def insertListing(conn,name,description):
+#Insert new listing; returns the auto-incremented ID of that listing.
+#Draft:
+def insertItem(conn,name,category,free,description,condition,price):
+    status = 'Still Available'
     curs = dbi.dict_cursor(conn)
+    #For now, no image.
     curs.execute('''
-        insert into item(item_name,seller_id,item_description)
-        values (%s,%s,%s)''',
-        [name,seller_id,description])
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price)
+        values (%s,%s,%s,%s,%s,%s,%s,%s)''',
+        [name,sellerID,category,free,status,condition,description,price])
     conn.commit()
-    return "insertListing function finished"
+    itemID = getLastInsertID(conn)
+    return itemID
+
+#Retreives the id of the last inserted item.
+def getLastInsertID(conn):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select last_insert_id()''')
+    itemID = curs.fetchone()
+    return itemID['last_insert_id()']
+
+
     
 #Update listing.
 
@@ -27,12 +41,12 @@ def getListings(conn):
 
 
 #Retrieve one listing given item id.
-def getListing(conn, item_identifier): 
+def getListing(conn, itemID): 
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from item where item_id = %s '''
-    val = [item_id]
+    val = [itemID]
     curs.execute(sql, val)
-    results = curs.fetchall()
+    results = curs.fetchone()
     return results
 
 
@@ -41,10 +55,10 @@ if __name__ == '__main__':
     dbi.cache_cnf()  
     dbi.use('gem_db')
     conn = dbi.connect()
-    result = getListings(conn)
-    print(result)
-    print(len(result))
-
-    #result = insertListing(conn,"shirt","red")
-    #print(result) 
+    #result = getListing(conn,5)
+    #result = getListings(conn)
+    #print(len(result))
+    #result = insertItem(conn,"shirt","Clothing",False,"red","Brand New","10.50")
+    #print(result.f)
+    print(result) 
 

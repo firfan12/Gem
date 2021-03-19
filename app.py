@@ -12,8 +12,13 @@ import listing
 # import cs304dbi_sqlite3 as dbi
 
 import random
-#Render Form Template
+#Render main page.
 @app.route("/")
+def index():
+ return render_template("base.html")
+
+#Render Form Template
+@app.route("/listingform/")
 def listingForm():
     return render_template("listingForm.html")
 
@@ -22,16 +27,28 @@ def listingForm():
 def listingReturn():
     conn = dbi.connect()
     if request.method == 'POST':
-        nameInput = request.form['name']
-        descriptionInput = request.form['description']
-        template = '''<h1>Here's what we got from you! - only description for now</h1>
-            <p>Name: {nameInput1}</p>
-             <p>Description: {descriptionInput1}</p>
-           '''
-        page = template.format(nameInput1=nameInput, descriptionInput1=descriptionInput)
-        #insert item description
-        listing.insertListing(conn,nameInput,descriptionInput)
-        return page
+        #Retreive answers.
+        name = request.form['name']
+        #For now, let's just say that the item is only category 'clothing'.
+        categoryClothing = request.form['category1']
+        description = request.form['description']
+        condition = request.form['condition']
+        #No database equivalent yet for 'availablefor'.
+        #availableForSell = request.form['sellmode1']
+        #ffofp means "for free or for price"
+        ffofp = request.form['ffofp']
+        if ffofp == 'free':
+            free = True
+            price = None
+        else: 
+            free = False
+            price = request.form['price']
+        #Insert into DB, retreive itemID: 
+        itemID = listing.insertItem(conn,name,categoryClothing,free,description,condition,price)
+        print(itemID)
+        #Retrieve the listed item:
+        #item = listing.getListing(conn,itemID)
+        return redirect(url_for('itemPage',item_identifier = itemID))
 
 
 #Redirect Function, possibly omit
@@ -45,13 +62,12 @@ def feed():
     return render_template("listingFeed.html", listings = results)
 
 
-
-#Redirect Function, possibly omit
+#Page for an individual item. 
 @app.route("/item/<item_identifier>")
 def itemPage(item_identifier):
     conn = dbi.connect()
-    item = getListing(conn, item_identifier)
-    return render_template("listingPage.html", listing = item)
+    item = listing.getListing(conn,item_identifier)
+    return render_template("item.html", listing = item)
     
 
 
