@@ -1,11 +1,11 @@
 import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
-seller_id = "rarango@wellesley.edu"
+sellerID = "rarango@wellesley.edu"
 
 #Insert new listing; returns the auto-incremented ID of that listing.
 #Draft:
-def insertListing(conn,name,category,free,description,condition,price):
+def insertItem(conn,name,category,free,description,condition,price):
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
     #For now, no image.
@@ -28,7 +28,6 @@ def getLastInsertID(conn):
 #Update listing.
 
 #Delete listing.
-
 
 #Retrieve all listings.
 def getListings(conn): 
@@ -67,25 +66,25 @@ if __name__ == '__main__':
     #print(result.f)
     #result = insertListing(conn,"shirt","red")
 
-    insertListing(conn, "my sanity", "last hairs of insanity")
-    insertListing(conn, "iphone 6 phone case", "really well  loved, but protects your phone very well")
-    insertListing(conn, "clairo concert tickets", "tickets from a past concert that are so beautiful, they are frameable.")
-    insertListing(conn, "refrigerator", "perfect for your room!")
-    insertListing(conn, "saxophone", "in good condition, barely used! just has a few dents")
-    insertListing(conn, "desk lamp", "needs a new lightbulb but besides that in perfect condition")
+    # insertListing(conn, "my sanity", "last hairs of insanity")
+    # insertListing(conn, "iphone 6 phone case", "really well  loved, but protects your phone very well")
+    # insertListing(conn, "clairo concert tickets", "tickets from a past concert that are so beautiful, they are frameable.")
+    # insertListing(conn, "refrigerator", "perfect for your room!")
+    # insertListing(conn, "saxophone", "in good condition, barely used! just has a few dents")
+    # insertListing(conn, "desk lamp", "needs a new lightbulb but besides that in perfect condition")
 
 
-    insertListing(conn, "birkenstocks", "black; size 7")
-    insertListing(conn, "mug", "hand made, really beautiful colors")
-    insertListing(conn, "mirror", "small, really cute, great magnifying mirror")
-    insertListing(conn, "winter coat", "perfect for wellesley winters. fits a bit small")
-    insertListing(conn, "laundry detegent", "hypo-allergenic, brand new never used")
-    insertListing(conn, "beanie", "size small, North face, fits really snug")
+    # insertListing(conn, "birkenstocks", "black; size 7")
+    # insertListing(conn, "mug", "hand made, really beautiful colors")
+    # insertListing(conn, "mirror", "small, really cute, great magnifying mirror")
+    # insertListing(conn, "winter coat", "perfect for wellesley winters. fits a bit small")
+    # insertListing(conn, "laundry detegent", "hypo-allergenic, brand new never used")
+    # insertListing(conn, "beanie", "size small, North face, fits really snug")
 
 
-    result = getListings(conn)
-    print(result)
-    print(len(result))
+    # result = getListings(conn)
+    # print(result)
+    # print(len(result))
     #print(result) 
 
 
