@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
+{% endblock %}
+
+{% block main_content %}
+
+<div class="w3-container w3-padding-64" id="listingform">
+    <h1>Sell your stuff that you no longer use! </h1><br>
+    <h5>Have stuff in your room that you never use? List it for sale and make some $$!
+        You can always delete or update an item listing later.</h5>
+    <form target="_blank" class="search" method="POST" action="{{ url_for('listingReturn') }}">
+        <p><input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" 
+            required name="name">Item Name (model, make, and/or brand):</p>
+
+        <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
+
+                <label>
+                    <input class="w3-input w3-padding-16" required type=checkbox name="category1" value="Clothing">
+                    Clothing
+                </label>
+
+                <label>
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category2" value="Accessories">
+                    Accessories
+                </label>
+
+                <label>
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category3" value="Dorm Essentials">
+                    Dorm Essentials
+                </label>
+
+                <label>
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category4" value="Beauty">
+                    Beauty
+                </label>Beauty
+
+                <label>
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category5" value="School Supplies">
+                    School Supplies
+                </label>
+
+                <label> 
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category6" value="Tech">
+                    Tech
+                </label>
+
+                <label> 
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category7" value="Furniture">
+                    Furniture
+                </label>
+
+                <label> 
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category8" value="Textbooks">
+                    Textbooks
+                </label>
+                
+                <label> 
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category9" value="Food">
+                    Food
+                </label>
+                
+                <label> 
+                    <input class="w3-input w3-padding-16"  type=text name="category10" placeholder="Explanation">
+                    Other:
+                </label>
+            
+
+
+        <p><input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required
+                name="description">Item Description:</p>
+
+
+        <p><label>Condition:
+                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Brand New">
+                <label for="Brand New">Brand New</label>
+                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Gently Used">
+                <label for="Gently Used">Gently Used</label>
+                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Well Loved">
+                <label for="Well Loved">Well Loved</label>
+            </label></p>
+
+        <!--No database equivalent, yet.-->
+        <!--<p><label>Available for: 
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
+        <label for="sell">Sell</label>
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
+        <label for="sell">Rent</label>
+        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
+        <label for="sell">Trade</label>
+    </label></p>-->
+
+
+        <p><input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required
+                name="price" min="0">Price in dollars:</p>
+
+        <form class="page_buttons" method="GET" action="/redirect/">
+            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit_button"
+                value="post_listing">Create listing</button>
+            <!-- value="2020-11-16T20:00"...  label? req  them to select 1 checkbox.-->
+        </form>
+</div>
+
+{% endblock %}

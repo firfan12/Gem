@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+<!-- additional styles -->
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+<div class="hero-image">
+  <div class="hero-text">
+
+    <h1 style="font-size:50px">Welcome to Gem!</h1>
+
+    <p>Gem is the one stop shop for buying and selling
+      pre-loved items, within the Wellesley community!
+      Who knows, you might make a little
+      bit of cash, or might find a new pre-loved Gem!</p>
+
+    <!--button on left in center of page -->
+    <form class="page_buttons" method="GET" action="/redirect/">
+      <button name="submit_button" value="buy">Explore items for sale</button>
+    </form>
+
+    <!--button on right in center of page -->
+    <form class="page_buttons" method="GET" action="/redirect/">
+      <button name="submit_button" value="sell">Sell an Item</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
