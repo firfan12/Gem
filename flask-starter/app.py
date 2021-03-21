@@ -142,20 +142,33 @@ def main_page_buttons():
    
 
 #Form Result Function
+#Form Result Function
 @app.route("/listing/",methods=['POST','GET'])
 def listingReturn():
     conn = dbi.connect()
     if request.method == 'POST':
-        nameInput = request.form['name']
-        descriptionInput = request.form['description']
-        template = '''<h1>Here's what we got from you! - only description for now</h1>
-            <p>Name: {nameInput1}</p>
-             <p>Description: {descriptionInput1}</p>
-           '''
-        page = template.format(nameInput1=nameInput, descriptionInput1=descriptionInput)
-        #insert item description
-        listing.insertListing(conn,nameInput,descriptionInput)
-        return page
+        #Retreive answers.
+        name = request.form['name']
+        #For now, let's just say that the item is only category 'clothing'.
+        categoryClothing = request.form['category1']
+        description = request.form['description']
+        condition = request.form['condition']
+        #No database equivalent yet for 'availablefor'.
+        #availableForSell = request.form['sellmode1']
+        #ffofp means "for free or for price"
+        ffofp = request.form['ffofp']
+        if ffofp == 'free':
+            free = True
+            price = None
+        else: 
+            free = False
+            price = request.form['price']
+        #Insert into DB, retreive itemID: 
+        itemID = listing.insertItem(conn,name,categoryClothing,free,description,condition,price)
+        print(itemID)
+        #Retrieve the listed item:
+        #item = listing.getListing(conn,itemID)
+        return redirect(url_for('itemPage',item_identifier = itemID))
 
 @app.before_first_request
 def init_db():

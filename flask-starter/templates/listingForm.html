@@ -36,31 +36,118 @@
     <h1>Sell your stuff that  you no longer use! </h1><br>
     <p>Have stuff in your room that you never use? List it for sale and make some $$!</p>
     <p>You can always delete or update an item listing later.</p>
+    <br>
     <form target="_blank" class="search" method="POST" action= "{{ url_for('listingReturn') }}">
-      <p><input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="Name">Item Name (model, make, and/or brand):</p>
-      <p> </p>
-      <p><input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required name="Description">Item Description:</p>
-      <p><input class="w3-input w3-padding-16" type="text" placeholder="Item's condition" required name="condition">Condition:</p>
-      <p> </p>
+      <!--Item Name-->
+      <p>
+        <label for=name>Item Name (model, make, and/or brand):</label>
+        <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" id=name required name="name">
+     </p>
+      <br>
+      <!--Item Description-->
+      <p>
+          <label for=description>Item Description:</label>
+          <input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" id=description required name="description">
+      </p>
+      <br>
+      <!--Item Condition-->
+      <p>Condition:</p>
+        <input type="radio" id="Brand New" required name="condition" value="Brand New">
+        <label for="Brand New">Brand New</label>
+        <br>
+        <input type="radio" id = "Gently Used" required name="condition" value="Gently Used">
+        <label for="Gently Used">Gently Used</label>
+        <br>
+        <input type="radio" id="Well Loved" required name="condition" value="Well Loved">
+        <label for="Well Loved">Well Loved</label>
+     </p>
+      <br>
+      <!--Item For Free or For Price-->
+      <p>For Free or For Price:</p>
+      <p>
+        <input type="radio" required name="ffofp" id=free value="free">
+        <label for="free">Free</label>
+        <br>
+        <input type="radio" required name="ffofp" id=priced value="priced">
+        <label for="priced">Set A Price</label>
+      </p>
+      <br>
+    <!--Item Price-->
+      <p>
+         <label for=price>Item Price (if not "Free", as indicated above):</label>
+         <input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" id=price name="price">
+      </p>
+      <br>
+      <!--Item Categories-->
+      <p>Category (for now, must click and can only click "Clothing")</p>
+      <p>
+        <!--Clothing Required For Now-->
+        <input type = checkbox  id=category1 required name = "category1" value ="Clothing">
+        <label for="category1">Clothing</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category2 name = "category2" value ="Accessories">
+        <label for = "category2">Accessories</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category3 name = "category3" value ="Dorm Essentials">
+        <label for = "category3">Dorm Essentials</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category4 name = "category4" value ="Beauty">
+        <label for = "category4">Beauty</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category5 name = "category5" value ="School Supplies">
+        <label for = "category5">School Supplies</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category6 name = "category6" value ="Tech">
+        <label for = "category6">Tech</label>
+      </p>
+      <p>
+        <input type = checkbox  id=category7 name = "category7" value ="Furniture">
+        <label for = "category7">Furniture</label>
+      </p>
+      <p>
+        <input type = checkbox id=category8 name = "category8" value ="Textbooks">
+        <label for = "category8">Textbooks</label>
+      </p>
+      <p>
+        <input type = checkbox id=category9 name = "category9" value ="Food">
+        <label for = "category9">Food</label>
+      </p>
+      <p>
+        <label for = "category10">Other: </label>
+        <input type = text id=category10 name = "category10" value = "Other"></label></p>
+      </p>
+     
+      <!--Selling Mode not yet incorporated into the database tables.-->
       <!-- <p><input class="w3-input w3-padding-16" type="text" placeholder="Message \ Special requirements" required name="Message">Selling Mode:</p> -->
-      <p><label>Selling Mode (can be more than one): 
+      <!--<p><label>Selling Mode (can be more than one): 
         <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode1"  name="sellmode1" value = "sell">
         <label for="sell">Sell</label>
         <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode2"  name="sellmode2" value = "rent">
         <label for="sell">Rent</label>
         <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode3"  name="sellmode3" value = "trade">
         <label for="sell">Trade</label>
-     </label></p>
-     <p><input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price">Price in dollars:</p>
-     <p> </p>
+     </label></p>-->
+
+     <!--Submit-->
      <p><button class="w3-button w3-light-grey w3-section" type="submit">Create listing</button></p>
-      
-      <!-- value="2020-11-16T20:00"...  label? req  them to select 1 checkbox.-->
+
     </form>
   </div>
 
+ 
+<!--
+    <p>
+          <label for=condition>Item Condition:</label>
+          <input class="w3-input w3-padding-16" type="text" placeholder="Item's condition" id=condition required name="condition">
+      </p>
+-->
+      <!-- value="2020-11-16T20:00"...  label? req  them to select 1 checkbox.-->
 
-<!---->
 <!-- <form class="search" method="POST" action= "{{ url_for('listingReturn') }}">
     <p><label>Item Name (model, make, and/or brand): <input type="text" name="name"></label>
     <p><label>Item Description: <input type="text" name="description"></label></p>
