@@ -26,7 +26,7 @@ create table item(
    status enum('Still Available','Awaiting Pickup','Sold') not null,
    image varchar(30) not null, 
    item_condition set('Brand New','Gently Used','Well Loved') not null,
-   todo set('For Sale''For Rent''For Trade'),
+   sellmode set('For Sale','For Rent','For Trade'),
    item_description varchar(200) not null,
    price double,
    primary key (item_id),
