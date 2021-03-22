@@ -16,20 +16,18 @@ def insertItem(conn,name,category,free,description,condition,price):
     conn.commit()
     itemID = getLastInsertID(conn)
     return itemID
-
+   
+   
 #Retreives the id of the last inserted item.
 def getLastInsertID(conn):
     curs = dbi.dict_cursor(conn)
     curs.execute('''select last_insert_id()''')
     itemID = curs.fetchone()
     return itemID['last_insert_id()']
-
-
-    
+     
 #Update listing.
 
 #Delete listing.
-
 
 #Retrieve all listings.
 def getListings(conn): 
@@ -40,14 +38,20 @@ def getListings(conn):
     return results
 
 
+
 #Retrieve one listing given item id.
-def getListing(conn, itemID): 
+def getListing(conn, item_identifier): 
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from item where item_id = %s '''
-    val = [itemID]
+    val = [item_identifier]
     curs.execute(sql, val)
-    results = curs.fetchone()
+    results = curs.fetchall()
     return results
+
+
+
+
+
 
 
 #Testing.
@@ -60,5 +64,30 @@ if __name__ == '__main__':
     #print(len(result))
     #result = insertItem(conn,"shirt","Clothing",False,"red","Brand New","10.50")
     #print(result.f)
-    print(result) 
+    #result = insertListing(conn,"shirt","red")
 
+    # insertListing(conn, "my sanity", "last hairs of insanity")
+    # insertListing(conn, "iphone 6 phone case", "really well  loved, but protects your phone very well")
+    # insertListing(conn, "clairo concert tickets", "tickets from a past concert that are so beautiful, they are frameable.")
+    # insertListing(conn, "refrigerator", "perfect for your room!")
+    # insertListing(conn, "saxophone", "in good condition, barely used! just has a few dents")
+    # insertListing(conn, "desk lamp", "needs a new lightbulb but besides that in perfect condition")
+
+
+    # insertListing(conn, "birkenstocks", "black; size 7")
+    # insertListing(conn, "mug", "hand made, really beautiful colors")
+    # insertListing(conn, "mirror", "small, really cute, great magnifying mirror")
+    # insertListing(conn, "winter coat", "perfect for wellesley winters. fits a bit small")
+    # insertListing(conn, "laundry detegent", "hypo-allergenic, brand new never used")
+    # insertListing(conn, "beanie", "size small, North face, fits really snug")
+
+
+    # result = getListings(conn)
+    # print(result)
+    # print(len(result))
+    #print(result) 
+
+
+
+
+    

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<style>
+  div.gallery {
+    border: 1px solid #ccc;
+  }
+
+  div.gallery:hover {
+    border: 1px solid #777;
+  }
+
+  div.gallery img {
+    width: 100%;
+    height: auto;
+  }
+
+  div.desc {
+    padding: 15px;
+    text-align: center;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .responsive {
+    padding: 0 6px;
+    float: left;
+    width: 24.99999%;
+  }
+
+  @media only screen and (max-width: 700px) {
+    .responsive {
+      width: 49.99999%;
+      margin: 6px 0;
+    }
+  }
+
+  @media only screen and (max-width: 500px) {
+    .responsive {
+      width: 100%;
+    }
+  }
+
+  .clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+    h1 { 
+        display: block; 
+        margin: auto;
+        text-align: center;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block main_content %}
+
+<h1> Listings</h1>
+<!-- listing dictionaries -->
+{%for listing in listings %}
+<!-- create a listing: div or figure-->
+<div class="responsive">
+  <div class="gallery">
+    <!-- Rounded switch -->
+    <label class="switch">
+      <input type="checkbox">
+      <span class="slider round"></span>
+    </label>
+    <a target="_blank" href="{{url_for('itemPage', item_identifier = listing.item_id)}}">
+      <img src="../static/product1.jpeg" alt="Mountains" width="600" height="400">
+    </a>
+    <div class="desc">{{listing.item_name}}</div>
+    <div class="desc">${{listing.price}}</div>
+  </div>
+</div>
+{% endfor %}
+<div class="clearfix"></div>
+
+
+<!-- css: inline block, width < 100% -->
+<!-- https://www.w3schools.com/css/css_image_gallery.asp -->
+<!-- https://www.w3schools.com/howto/howto_css_switch.asp -->
+
+{% endblock %}

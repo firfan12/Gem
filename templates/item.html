@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<!-- all information -->
+<!-- pass in listing -->
+<h1>Here's your listing!</h1>
+<div>
+    <p>Name: {{listing.item_name}}</p>
+    <p>Seller: {{listing.seller_id}}</p>
+    <p>Category: {{listing.category}}</p>
+    {% if listing.free == 1: %}
+        <p>Free? True</p>
+    {% else: %}
+        <p>Free? False</p>
+    {% endif %}
+    <p>Status: {{listing.status}}</p>
+    <p>Image: {{listing.image}}</p>
+    <p>Condition: {{listing.item_condition}}</p>
+    <p>Description: {{listing.item_description}}</p>
+    <p>Price, if not free: {{listing.price}}</p>
+
+</div>
+{% endblock %}

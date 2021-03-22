@@ -5,14 +5,14 @@ sellerID = "rarango@wellesley.edu"
 
 #Insert new listing; returns the auto-incremented ID of that listing.
 #Draft:
-def insertItem(conn,name,category,free,description,condition,price):
+def insertItem(conn,name,category,description,condition,price):
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
     #For now, no image.
     curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price)
-        values (%s,%s,%s,%s,%s,%s,%s,%s)''',
-        [name,sellerID,category,free,status,condition,description,price])
+        insert into item(item_name,seller_id,category,status,item_condition,item_description,price)
+        values (%s,%s,%s,%s,%s,%s,%s)''',
+        [name,sellerID,category,status,condition,description,price]) 
     conn.commit()
     itemID = getLastInsertID(conn)
     return itemID
