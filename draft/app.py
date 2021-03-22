@@ -94,7 +94,6 @@ def query():
     elif len(results) > 1:
         return render_template('listings.html', page_title ='Listings Found',listings = results)
 
-        
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
@@ -104,9 +103,8 @@ def listingReturn():
     if request.method == 'POST':
         #Retreive all submitted listing information.
         name = request.form['name']
-        #For now, let's just say that the item is only category 'clothing' 
-        # (which  is category1).
-        categoryClothing = request.form['category1']
+        #For now, let's just say you can only select one category to list your item under. i.e Clothing.
+        categoryClothing = request.form['category']
         description = request.form['description']
         condition = request.form['condition']
         price = request.form['price']
@@ -114,13 +112,13 @@ def listingReturn():
             free = True
         else:
             free = False
-        
-        #No database equivalent yet for 'availablefor'(i.e. whether they are selling/renting/trading)
-        #availableForSell = request.form['sellmode1']
-
+        # sell mode only  works for one option at the moment
+        availableForMode = request.form.getlist('sellmode')
+        print(availableForMode)
         #Insert into DB, retreive itemID: 
-        itemID = listing.insertListing(conn,name,categoryClothing,free, description,
-                condition,price) 
+       
+        itemID = listing.insertListing(conn,name,categoryClothing,free, description, 
+                condition,price,availableForMode) 
 
         print(itemID)
         #Retrieve the listed item:

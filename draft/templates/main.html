@@ -18,23 +18,13 @@
       bit of cash, or might find a new pre-loved Gem!</p>
 
     <!--button on left in center of page -->
-    <!-- <form class="page_buttons" method="GET" action="/redirect/">
-      <button name="submit_button" value="buy">Explore items for sale</button>
-    </form> -->
-
-    <!--Go To Listings-->
     <a href = "{{ url_for('listings') }}">
       <button name="submit_button" value="buy">Explore items for sale</button>
     </a>
 
     <!--button on right in center of page -->
-    <!-- <form class="page_buttons" method="GET" action="/redirect/">
+    <a href = "{{ url_for('listingForm') }}">
       <button name="submit_button" value="sell">Sell an Item</button>
-    </form> -->
-
-    <!--Create A Listing-->
-    <a href = "{{ url_for('listingForm' )}}">
-      <name="submit_button" value="sell">Sell an Item</button>
     </a>
   </div>
 </div>

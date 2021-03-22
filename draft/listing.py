@@ -6,6 +6,8 @@ import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
 sellerID = "rarango@wellesley.edu"
+#inserting manually in terminal
+# insert into person(name,email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 
 
 #Retreives the id of the last inserted item.
@@ -46,15 +48,15 @@ def getListing(conn, item_identifier):
 
 #Insert new listing; returns the auto-incremented ID of that listing.
 #Draft:
-def insertListing(conn,name,category,free,description,condition,price):
+def insertListing(conn,name,category,free,description,condition,price, availableForMode):
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
     #For now, image not implemented. Using hardcoded image for the draft.
     curs.execute('''
         insert into item(item_name,seller_id,category,free,status,item_condition,
-                        item_description,price)
-        values (%s,%s,%s,%s,%s,%s,%s, %s)''',
-        [name,sellerID,category,free,status,condition,description,price]) 
+                        item_description,price, sellmode)
+        values (%s,%s,%s,%s,%s,%s,%s, %s, %s)''',
+        [name,sellerID,category,free,status,condition,description,price, availableForMode]) 
     conn.commit()
     itemID = getLastInsertID(conn)
     return itemID

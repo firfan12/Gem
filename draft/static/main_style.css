@@ -42,19 +42,18 @@ body, html {
   background-color: #ddd;
   text-align: center;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .hero-text button:hover {
   background-color: #555;
   color: rgb(119, 115, 115);
   display: inline-flex;
-  padding-right: 1em;
+  padding-right: 2em;
+  
 }
 
-.page_buttons {
-  display: inline-flex;
-  padding-right: 1em;
-}
+
 
 
 

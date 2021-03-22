@@ -17,47 +17,47 @@
         <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
 
                 <label>
-                    <input class="w3-input w3-padding-16" required type=checkbox name="category1" value="Clothing">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Clothing">
                     Clothing
                 </label>
 
                 <label>
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category2" value="Accessories">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Accessories">
                     Accessories
                 </label>
 
                 <label>
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category3" value="Dorm Essentials">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Dorm Essentials">
                     Dorm Essentials
                 </label>
 
                 <label>
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category4" value="Beauty">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Beauty">
                     Beauty
                 </label>Beauty
 
                 <label>
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category5" value="School Supplies">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="School Supplies">
                     School Supplies
                 </label>
 
                 <label> 
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category6" value="Tech">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Tech">
                     Tech
                 </label>
 
                 <label> 
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category7" value="Furniture">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Furniture">
                     Furniture
                 </label>
 
                 <label> 
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category8" value="Textbooks">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Textbooks">
                     Textbooks
                 </label>
                 
                 <label> 
-                    <input class="w3-input w3-padding-16"  type=checkbox name="category9" value="Food">
+                    <input class="w3-input w3-padding-16"  type=checkbox name="category" value="Food">
                     Food
                 </label>
                 
@@ -73,31 +73,35 @@
 
 
         <p><label>Condition:
-                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Brand New">
+                <input class="w3-input w3-padding-16" required type="radio" name="condition" value="Brand New">
                 <label for="Brand New">Brand New</label>
-                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Gently Used">
+                <input class="w3-input w3-padding-16" required type="radio" name="condition" value="Gently Used">
                 <label for="Gently Used">Gently Used</label>
-                <input class="w3-input w3-padding-16" type="radio" name="condition" value="Well Loved">
+                <input class="w3-input w3-padding-16" required type="radio" name="condition" value="Well Loved">
                 <label for="Well Loved">Well Loved</label>
             </label></p>
 
-        <!--No database equivalent, yet.-->
-        <!--<p><label>Available for: 
-        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode1" name="sellmode1" value = "sell">
-        <label for="sell">Sell</label>
-        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode2" name="sellmode2" value = "rent">
-        <label for="sell">Rent</label>
-        <input class="w3-input w3-padding-16" type="checkbox" id = "sellmode3" name="sellmode3" value = "trade">
-        <label for="sell">Trade</label>
-    </label></p>-->
+        <!-- Whether the item is for sale, rent, or trade -->
+        <!-- can only select one option: sell for now -->
+        <p><label>Available for: 
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Sale">
+            <label for="sell">Sell</label>
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Rent">
+            <label for="sell">Rent</label>
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Trade">
+            <label for="sell">Trade</label>
+        </label></p>
 
 
         <p><input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required
                 name="price" min="0">Price in dollars:</p>
-
-        <input class="w3-button w3-light-grey w3-section center" type="submit" value="Create Listing">
-            <!-- value="2020-11-16T20:00"...  label? req  them to select 1 checkbox.-->
-    </form>
+                
+       
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit">Create listing</button>
+   
+       
+        </form>
 </div>
 
 {% endblock %}
