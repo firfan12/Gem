@@ -17,8 +17,6 @@ def getLastInsertID(conn):
     itemID = curs.fetchone()
     return itemID['last_insert_id()']
 
-
-
 #Update listing.
     #Will implement later. 
 
