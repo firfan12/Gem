@@ -82,12 +82,13 @@
             </label></p>
 
         <!-- Whether the item is for sale, rent, or trade -->
+        <!-- can only select one option: sell for now -->
         <p><label>Available for: 
-            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "sell">
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Sale">
             <label for="sell">Sell</label>
-            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "rent">
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Rent">
             <label for="sell">Rent</label>
-            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "trade">
+            <input class="w3-input w3-padding-16" type="checkbox" name="sellmode" value = "For Trade">
             <label for="sell">Trade</label>
         </label></p>
 
@@ -95,10 +96,12 @@
         <p><input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required
                 name="price" min="0">Price in dollars:</p>
                 
-        <a href = "{{ url_for('listingForm') }}">
-            <button class="w3-button w3-light-grey w3-section center" type="submit" 
-             value="buy">Create listing</button>
-          </a>
+       
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit">Create listing</button>
+   
+       
+        </form>
 </div>
 
 {% endblock %}
