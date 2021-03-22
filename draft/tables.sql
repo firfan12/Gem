@@ -24,7 +24,7 @@ create table item(
    'School Supplies','Tech','Furniture','Textbooks','Food','Other') not null, 
    free boolean not null,
    status enum('Still Available''Awaiting Pickup''Sold') not null,
-   todo enum('For Sale''For Rent''For Trade'),
+   todo set('For Sale''For Rent''For Trade'),
    image varchar(30) not null, 
    item_condition set('Brand New','Gently Used','Well Loved') not null,
    item_description varchar(200) not null,
