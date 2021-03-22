@@ -95,25 +95,6 @@ def query():
         return render_template('listings.html', page_title ='Listings Found',listings = results)
 
 
-#Handles the routing of buttons on the main page and on the listing form.
-#Rebecca: could you look  here to see if this is modular enough just if you have time,
-#  considering it is buttons
-#on diff pages? I added this but am not sure if impleemnted right. 
-# Could you also check the forms and the actions, esp surrounding the buttons  and on 
-# listingform.html?
-# not sure if I did this right....
-@app.route('/redirect/',  methods=['POST','GET'])
-def page_buttons():
-    if request.method == 'GET':
-        # print(request.args)
-        if request.args['submit_button'] == "buy":
-            return redirect(url_for('listings')) 
-        elif request.args['submit_button'] == "sell":
-            return redirect(url_for('listingForm'))
-        elif  request.args['submit_button'] == "post_listing":
-            return redirect(url_for('listingForm'))
-
-        
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
@@ -123,9 +104,8 @@ def listingReturn():
     if request.method == 'POST':
         #Retreive all submitted listing information.
         name = request.form['name']
-        #For now, let's just say that the item is only category 'clothing' 
-        # (which  is category1).
-        categoryClothing = request.form['category1']
+        #For now, let's just say you can only select one category to list your item under. i.e Clothing.
+        categoryClothing = request.form['category']
         description = request.form['description']
         condition = request.form['condition']
         price = request.form['price']
@@ -134,10 +114,9 @@ def listingReturn():
         else:
             free = False
         
-        #Rebecca: are these lines supposed to be here? The commented out parts. If so, 
-        #feel free to remove them. Just not sure what availablefor is.
-        #No database equivalent yet for 'availablefor'.
-        #availableForSell = request.form['sellmode1']
+       
+       
+        availableForSell = request.form['sellmode']
         #Insert into DB, retreive itemID: 
         itemID = listing.insertListing(conn,name,categoryClothing,free, description,
                 condition,price) 
