@@ -104,7 +104,7 @@ def listingReturn():
         #Retreive all submitted listing information.
         name = request.form['name']
         #For now, let's just say you can only select one category to list your item under. i.e Clothing.
-        categoryClothing = request.form['category']
+        categoryClothing = request.form.getlist('category') #changed
         description = request.form['description']
         condition = request.form['condition']
         price = request.form['price']
@@ -113,7 +113,7 @@ def listingReturn():
         else:
             free = False
         # sell mode only  works for one option at the moment
-        availableForMode = request.form.getlist('sellmode')
+        availableForMode = request.form.getlist('sellmode') #changed
         print(availableForMode)
         #Insert into DB, retreive itemID: 
        
