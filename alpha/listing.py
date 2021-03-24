@@ -17,8 +17,23 @@ sellerID = "rarango@wellesley.edu"
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
 
-#Update listing.
-
+def update(conn,id,name,category,free,description,condition,price, sellmode):
+    '''
+        Takes a database connection, the item ID (int), item name (str), 
+        item categories (str), if the item is free (boolean), 
+        item description (str), item condition (str), item price (int), 
+        if the item is for sell/rent/trade (str).
+        Updates the values of the specified item in item table.
+        Returns the a dictionary with all of the item's updated information.
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+                update item set name=%s,category=%s,free=%s,description=%s,condition=%s,price=%s,sellmode=%s
+                where item_id=%s''',
+                [name,category,free,description,condition,price,sellmode,id]
+                )
+    result = getListing(conn,id)
+    return result
 
 
 #Delete listing.
@@ -58,7 +73,7 @@ def getListing(conn, item_identifier):
 
 #Insert new listing; returns the auto-incremented ID of that listing.
 #Draft:
-def insertListing(conn,name,category,free,description,condition,price, availableForMode):
+def insertListing(conn,name,category,free,description,condition,price, sellmode):
     '''
        Takes a database connection, item name (str), item categories (str), 
        if the item is free (boolean), item description (str), 
@@ -74,7 +89,7 @@ def insertListing(conn,name,category,free,description,condition,price, available
         insert into item(item_name,seller_id,category,free,status,item_condition,
                         item_description,price, sellmode)
         values (%s,%s,%s,%s,%s,%s,%s, %s, %s)''',
-        [name,sellerID,category,free,status,condition,description,price, availableForMode]) 
+        [name,sellerID,category,free,status,condition,description,price, sellmode]) 
     conn.commit()
     itemID = curs.execute('''select last_insert_id()''')
     return itemID['last_insert_id()']

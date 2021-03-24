@@ -85,12 +85,23 @@ def itemPage(item_identifier):
 
 
 #renders the page where one can create a listing
-@app.route("/listingform/")
-def listingForm():
+@app.route("/createlisting/")
+def createListing():
     '''
        Renders the form to create a listing.
     '''
-    return render_template("listing_form.html", page_title='Create a listing')
+    return render_template("listing_form.html", page_title='Create a listing',update=False)
+
+@app.route("/updatelisting/<int:itemID>")
+def updateListing(itemID):
+    '''
+        Renders the form to update a listing.
+    '''
+    conn = dbi.connect()
+    listingForUpdate = listing.getListing(conn,itemID)
+    return render_template("update.html",listing = listingForUpdate,page_title="Update Listing")
+    #listing = listing.getListing(itemID)
+    #return render_template("update.html",listing = listing,page_title="Update Listing")
 
 
 #Doesn't work, not finished implementing!
@@ -125,6 +136,9 @@ def query():
 #and tells them that their listing was posted.
 @app.route("/listing/",methods=['POST','GET'])
 def listingReturn():
+    '''
+        This route displays the result of the item, whether it has been inserted or updated.
+    '''
     conn = dbi.connect()
     if request.method == 'POST':
         #Retreive all submitted listing information.

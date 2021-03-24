@@ -6,10 +6,8 @@
 
 
 {% block main_content %}
-
     <!-- for loop used to extract the dictionary from the list. 
     The dictionary contains all  of the listing's information -->
-    {% for listing in listing %}
     <!-- Item Section -->
     <div class="w3-row w3-padding-64" id="listing_details">
         <div class="w3-col l6 w3-padding-large">
@@ -44,10 +42,14 @@
             <!-- Will implement the image handler (and change to url_for) later for alpha verison -->
             <img src="../static/images/product1.jpeg" class="w3-round w3-image w3-opacity-min" 
                 alt="{{listing.item_name}}" style="width:100%"> 
-                
         </div>
     </div>
-    {% endfor %}
-
-
+   
+    <!--Implement some type of for loop to determine whether the user a buyer or seller. If seller, display button below.-->
+    <!--Update Button-->
+    <a href = "{{ url_for('updateListing',itemID=listing.item_id) }}">
+        <button class="w3-button w3-light-grey w3-section center">
+            Update
+        </button>
+    </a>
 {% endblock %}
