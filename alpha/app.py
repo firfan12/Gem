@@ -135,6 +135,8 @@ def query():
     #process query based on how many items from the database matched the query:
     if len(results) == 0:  
         flash("Sorry, no items were found!")
+        #fig. out how to remove other flashed messages when flashing this one!
+        #i.e. it still said 21 listings found when tried to find a different listing
         return redirect(request.referrer)
         #return render_template('no_query_result.html', page_title ='No Query Results')
                                 # message = "Sorry, no items were found with that name")                     
