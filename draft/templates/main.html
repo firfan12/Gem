@@ -9,9 +9,7 @@
 {% block main_content %}
 <div class="hero-image">
   <div class="hero-text">
-
-    <h1 style="font-size:50px">Welcome to Gem!</h1>
-
+    <h1>Welcome to Gem!</h1>
     <p>Gem is the one stop shop for buying and selling
       pre-loved items, within the Wellesley community!
       Who knows, you might make a little
@@ -19,12 +17,12 @@
 
     <!--button on left in center of page -->
     <a href = "{{ url_for('listings') }}">
-      <button name="submit_button" value="buy">Explore items for sale</button>
+        <button name="submit_button" value="buy">Explore Items for Sale</button>
     </a>
 
     <!--button on right in center of page -->
     <a href = "{{ url_for('listingForm') }}">
-      <button name="submit_button" value="sell">Sell an Item</button>
+        <button name="submit_button" value="sell">Sell an Item</button>
     </a>
   </div>
 </div>

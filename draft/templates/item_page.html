@@ -6,48 +6,42 @@
 
 
 {% block main_content %}
+<!-- listing contains all listing information user submitted when creating a listing. -->
+<div class="w3-row w3-padding-64" id="listing_details">
+    <div class="w3-col l6 w3-padding-large">
+        <h1 class="w3-center">Item Name: {{listing.item_name}}</h1><br>
 
-    <!-- for loop used to extract the dictionary from the list. 
-    The dictionary contains all  of the listing's information -->
-    {% for listing in listing %}
-    <!-- Item Section -->
-    <div class="w3-row w3-padding-64" id="listing_details">
-        <div class="w3-col l6 w3-padding-large">
-            <h1 class="w3-center">Item Name: {{listing.item_name}}</h1><br>
-            
-            <h4>The item is for:</h4>
-            <p class="w3-text-grey">{{listing.sellmode}}</p><br>
+        <!-- for sale, for rent, or for trade -->
+        <h4>The item is:</h4>
+        <p class="w3-text-grey">{{listing.sellmode}}</p><br>
 
-            <h4>Seller contact information:</h4>
-            <p class="w3-text-grey">{{listing.seller_id}}</p><br>
+        <!-- seller's wellesley  email -->
+        <h4>Seller contact information:</h4>
+        <p class="w3-text-grey">{{listing.seller_id}}</p><br>
 
-            <h4>Category</h4>
-            <p class="w3-text-grey">{{listing.category}}</p><br>
+        <h4>Category</h4>
+        <p class="w3-text-grey">{{listing.category}}</p><br>
 
-            <!--Status is whether the item is sold already, or not. -->
-            <h4>Status</h4>
-            <p class="w3-text-grey">{{listing.status}}</p><br>
+        <!--Status is whether the item is sold, not sold, or awaiting pickup. -->
+        <h4>Status</h4>
+        <p class="w3-text-grey">{{listing.status}}</p><br>
 
-            <h4>Condition</h4>
-            <p class="w3-text-grey">{{listing.item_condition}}</p><br>
+        <h4>Condition</h4>
+        <p class="w3-text-grey">{{listing.item_condition}}</p><br>
 
-            <h4>Description</h4>
-            <p class="w3-text-grey">{{listing.item_description}}</p>
+        <h4>Description</h4>
+        <p class="w3-text-grey">{{listing.item_description}}</p><br>
 
-            <h4>Price</h4>
-            <p class="w3-text-grey">{{listing.price}}</p>
-        </div>
-
-        <div class="w3-col l6 w3-padding-large">
-            <!-- For now, we are hardcoding the image, since still not sure how to save photos that
-            users submit. We will implement this functionality later. -->
-            <!-- Will implement the image handler (and change to url_for) later for alpha verison -->
-            <img src="../static/images/product1.jpeg" class="w3-round w3-image w3-opacity-min" 
-                alt="{{listing.item_name}}" style="width:100%"> 
-                
-        </div>
+        <h4>Price</h4>
+        <p class="w3-text-grey">${{listing.price}}</p>
     </div>
-    {% endfor %}
 
-
+    <div class="w3-col l6 w3-padding-large">
+        <!-- For now, we are hardcoding the image, since still not sure how to save photos that
+            users submit. We will implement this functionality later after the File Uploads lesson
+            for alpha verison.-->
+        <img src="../static/images/product1.jpeg" class="w3-round w3-image w3-opacity-min" 
+        alt="{{listing.item_name}}">
+    </div>
+</div>
 {% endblock %}

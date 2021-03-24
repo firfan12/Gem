@@ -6,8 +6,8 @@ import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
 sellerID = "rarango@wellesley.edu"
+#insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 #inserting manually in terminal
-# insert into person(name,email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 
 
 #Retreives the id of the last inserted item.
@@ -91,7 +91,8 @@ def insertListing(conn,name,category,free,description,condition,price, sellmode)
         values (%s,%s,%s,%s,%s,%s,%s, %s, %s)''',
         [name,sellerID,category,free,status,condition,description,price, sellmode]) 
     conn.commit()
-    itemID = curs.execute('''select last_insert_id()''')
+    curs.execute('''select last_insert_id()''')
+    itemID = curs.fetchone()
     return itemID['last_insert_id()']
 
    
@@ -105,14 +106,14 @@ if __name__ == '__main__':
     #result = getListing(conn,5)
     #result = getListings(conn)
     #print(len(result))
-    #result = insertListing(conn,"shirt","Clothing",False,"red","Brand New","10.50")
+    result = insertListing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #print(result.f)
     #result = insertListing(conn,"shirt","red")
 
-    result = getListings(conn)
-    print(result)
-    print(len(result))
-    #print(result) 
+    #result = getListings(conn)
+    #print(result)
+    #print(len(result))
+    print(result) 
 
 
 

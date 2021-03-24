@@ -18,6 +18,8 @@ div.gallery img {
   height: auto;
 }
 
+
+
 /* styles the text descriptions: */
 div.desc {
   padding: 15px;
@@ -37,4 +39,10 @@ h1 {
     margin: auto;
     text-align: center;
     padding:2em;
+}
+
+/* styles the listings gallery: */
+img { 
+  width: 600;
+  height: 400;
 }

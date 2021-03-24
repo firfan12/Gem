@@ -143,8 +143,8 @@ def listingReturn():
     if request.method == 'POST':
         #Retreive all submitted listing information.
         name = request.form['name']
-        #For now, let's just say you can only select one category to list your item under. i.e Clothing.
-        categoryClothing = request.form.getlist('category') #changed
+        #Get list of categories.
+        categories = (',').join(request.form.getlist('category'))       
         description = request.form['description']
         condition = request.form['condition']
         price = request.form['price']
@@ -152,17 +152,13 @@ def listingReturn():
             free = True
         else:
             free = False
-        # sell mode only  works for one option at the moment
-        availableForMode = request.form.getlist('sellmode') #changed
-        print(availableForMode)
+        #Get list of sellmodes.
+        sellmode = (',').join(request.form.getlist('sellmode'))
         #Insert into DB, retreive itemID: 
        
-        itemID = listing.insertListing(conn,name,categoryClothing,free, description, 
-                condition,price,availableForMode) 
-
+        itemID = listing.insertListing(conn,name,categories,free, description, 
+                condition,price,sellmode) 
         print(itemID)
-        #Retrieve the listed item:
-        #item = listing.getListing(conn,itemID)
         flash("Congrats! Your item is now listed for sale")
         return redirect(url_for('itemPage',item_identifier = itemID))      
 

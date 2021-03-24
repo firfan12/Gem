@@ -6,7 +6,7 @@
 * {box-sizing: border-box;}
   
 
-/* styling the text */
+/* styling the text: */
 body {
   margin: 0;
   font-family: "Times New Roman", Georgia, Serif;
@@ -17,6 +17,8 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: 5px;
     text-align: center;
 }
+
+
 
 
 
@@ -104,7 +106,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-/* button will not center. does not work, so commenting out for now. */
+/* button will not center. does not work, so commenting out for draft version and will
+fix for alpha version. */
 /* button {
   display: block;
   margin: auto;
