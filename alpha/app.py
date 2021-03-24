@@ -113,7 +113,6 @@ def updateListing(itemID):
     #return render_template("update.html",listing = listing,page_title="Update Listing")
 
 
-#Doesn't work, not finished implementing!
 #Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.
 @app.route('/search/') #methods=['POST','GET']?
