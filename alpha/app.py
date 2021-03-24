@@ -56,7 +56,7 @@ def profile():
 
 #creates the feed for the user to view all listings 
 #of items that are not sold
-@app.route("/listings/")
+@app.route("/listings/") #methods=['POST','GET']?
 def listings():
     '''
        Renders a page will all listings stated as "Still Available".
@@ -72,7 +72,7 @@ def listings():
 #Checks if the viewer is the buyer or seller.
 #If the viewer is a seller, then display the update and delete buttons.
 #If the viewer is a buyer, then 
-@app.route("/item/<item_identifier>")
+@app.route("/item/<item_identifier>") #methods=['POST','GET']?
 def itemPage(item_identifier):
     '''
        Renders a page for a single item.
@@ -85,7 +85,7 @@ def itemPage(item_identifier):
 
 
 #renders the page where one can create a listing
-@app.route("/createlisting/")
+@app.route("/createlisting/") #methods=['POST','GET']?
 def createListing():
     '''
        Renders the form to create a listing.
@@ -105,9 +105,9 @@ def updateListing(itemID):
 
 
 #Doesn't work, not finished implementing!
-#Processes users query for a certain movie or person. 
+#Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.
-@app.route('/search/')
+@app.route('/search/') #methods=['POST','GET']?
 def query():
     '''
        Renders search.
@@ -116,21 +116,29 @@ def query():
     curs = dbi.dict_cursor(conn)
     query = request.args['search']
    
+    #will include searching tags in the beta if have time 
     # get all listings in db that has this query as part of its name
-    sql = '''select * from item where item_name like  %s'''
-    vals = ['%' + query + '%']
+    sql = '''select * from item where item_name like %s 
+    or category like %s or item_description like %s''' #joining bc dn want duplicates
+    vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
     curs.execute(sql, vals)
     results = curs.fetchall()
-    #process query based on how items from the database matched the query:
+    
+    #process query based on how many items from the database matched the query:
     if len(results) == 0:  
-        return render_template('no_query_result.html', page_title ='No Query Results', 
-                                message = "Sorry, no items were found with that name")  
-    elif len(results) == 1: 
+        flash("Sorry, no items were found!")
+        return redirect(request.referrer)
+        #return render_template('no_query_result.html', page_title ='No Query Results')
+                                # message = "Sorry, no items were found with that name")                     
+    elif len(results) == 1:  #works
         item_id = results[0].get("item_id")
+        flash("Search results: one item found") 
         return redirect(url_for('itemPage', item_identifier = item_id))
     elif len(results) > 1:
-        return render_template('listings.html', page_title ='Listings Found',listings = results)
+        flash("Search results: {number_items} item found".format(number_items = len(results)))
+        return render_template('listings.html', listings = results, page_title ='Listings Found')
 
+ 
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
