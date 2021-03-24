@@ -15,6 +15,7 @@ import cs304dbi as dbi
 import listing  #imports helper methods
 # import cs304dbi_sqlite3 as dbi
 import random
+import bcrypt
 
 app.secret_key = 'your secret here'
 # replace that with a random key
@@ -34,6 +35,7 @@ def index():
     '''
     return render_template('main.html',page_title='Gem Home Page')
 
+
 #show user's all of their favorites listings on one  page
 @app.route('/favorites/')
 def favorites():
@@ -52,6 +54,13 @@ def profile():
        Renders the template for the profile.
     '''
     return render_template('profile.html',page_title='User Profile')
+
+@app.route('/login/')
+def login():
+    '''
+    Renders the template for the login page
+    '''
+    return render_template('login.html', page_title='Login')
 
 
 #creates the feed for the user to view all listings 
