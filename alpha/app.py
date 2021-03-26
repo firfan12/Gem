@@ -71,12 +71,12 @@ def listings():
        Renders a page will all listings stated as "Still Available".
     '''
     conn = dbi.connect()
-    results =  listing.getListings(conn)
+    results =  listing.get_listings(conn)
     return render_template("listings.html", listings = results, page_title='All listings')
 
 
 @app.route("/item/<item_identifier>",methods=['POST','GET'])
-def itemPage(item_identifier):
+def item_page(item_identifier):
     '''
        Renders a page for a single item.
        If the view is a seller, displays an update and delete button.
@@ -86,7 +86,7 @@ def itemPage(item_identifier):
     #If the request is GET.
     if request.method == 'GET': 
         #Get the database dictionary of the item given its ID.
-        item = listing.getListing(conn, item_identifier)
+        item = listing.get_listing(conn, item_identifier)
         return render_template("item_page.html", listing = item, page_title='One listing')
     #If the request is POST.
     if request.method == "POST":
@@ -104,36 +104,41 @@ def itemPage(item_identifier):
             sellmode = (',').join(request.form.getlist('sellmode'))
             #status = request.form['status']
             #Update the listing.
-            updatedItem = listing.update(conn,item_identifier,name,categories,free,description,condition,price,sellmode)
+            updated_listing = listing.update(conn,item_identifier,name,categories,free,description,condition,price,sellmode)
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
-            return render_template('item_page.html',listing=updatedItem,page_title="Updated Listing")
+            return render_template('item_page.html',listing=updated_listing,page_title="Updated Listing")
         #If the user wishes to delete their listing.
         #elif request.form['submit'] == 'delete':
             #Retreive the item_id.
             #Delete the listing.
             #Redirect to home page; flash a message telling the user their item has been deleted.
 
-
-
 #renders the page where one can create a listing
 @app.route("/createlisting/") #methods=['POST','GET']?
-def createListing():
+def create_listing():
     '''
        Renders the form to create a listing.
     '''
     return render_template("listing_form.html", page_title='Create a listing',update=False)
 
-#Unfinished.
-@app.route("/updatelisting/<int:itemID>")
-def updateListing(itemID):
+@app.route("/updatelisting/<int:item_identifier>")
+def update_listing(item_identifier):
     '''
+        Retreives information from database about the listing to be updated.
         Renders the form to update a listing.
     '''
     conn = dbi.connect()
-    listingForUpdate = listing.getListing(conn,itemID)
-    return render_template("update.html",listing = listingForUpdate,page_title="Update Listing")
+    item = listing.get_listing(conn,item_identifier)
+    return render_template("update.html",listing = item,page_title="Update Listing")
 
+@app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
+def delete_listing(item_identifier):
+    '''
+    '''
+    conn = dbi.connect()
+    listing_delete = listing.get_listing(conn,itemID)
+    return render_template("delete.html", listing = listing_delete)
 
 #Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.
@@ -175,7 +180,7 @@ def query():
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
 @app.route("/listing/",methods=['POST','GET'])
-def listingReturn():
+def listing_return():
     '''
         Gets information from the "Insert Listing" form.
         Inserts the new listing, and returns the auto-incremented ID of that listing.
@@ -197,10 +202,10 @@ def listingReturn():
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
             #Insert into DB, retreive itemID.
-            itemID = listing.insertListing(conn,name,categories,free,description,condition,price,sellmode) 
+            item_identifier = listing.insert_listing(conn,name,categories,free,description,condition,price,sellmode) 
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
-            return redirect(url_for('itemPage',item_identifier = itemID))
+            return redirect(url_for('item_page',item_identifier = item_identifier))
         #Do I need to through an error here?
         return redirect('<p>Error</p>')
 

@@ -16,7 +16,7 @@ sellerID = "rarango"
 #     curs.execute('''select last_insert_id()''')
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
-def insertListing(conn,name,category,free,description,condition,price,sellmode):
+def insert_listing(conn,name,category,free,description,condition,price,sellmode):
     '''
        Takes a database connection, item name (str), item categories (str), 
        if the item is free (boolean), item description (str), 
@@ -39,7 +39,7 @@ def insertListing(conn,name,category,free,description,condition,price,sellmode):
     return itemID['last_insert_id()']
 
 #Update a listing.
-def update(conn,itemID,name,category,free,description,condition,price,sellmode):
+def update(conn,item_identifier,name,category,free,description,condition,price,sellmode):
     '''
         Takes a database connection, the item ID (int), item name (str), 
         item categories (str), if the item is free (boolean), 
@@ -52,17 +52,31 @@ def update(conn,itemID,name,category,free,description,condition,price,sellmode):
     curs.execute('''
                 update item set item_name=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
-                [name,category,free,description,condition,price,sellmode,itemID])
+                [name,category,free,description,condition,price,sellmode,item_identifier])
     conn.commit()
-    result = getListing(conn,itemID)
+    result = get_listing(conn,item_identifier)
     return result
 
 #Delete listing.
-    #Will implement later. 
+def delete(conn,item_identifier):
+    '''
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+            delete from item
+            where item_id = %s''',
+            [itemID])
+    conn.commit()
+    result = get_listing(conn,item_identifier)
+    if result == None:
+        deleted = True
+    else:
+        deleted = False
+    return deleted
 
 
 #Retrieve all listings that are not marked as Sold.
-def getListings(conn): 
+def get_listings(conn): 
     '''
        Takes an database connection. 
        Retrieves all of the listings in the item table that 
@@ -78,7 +92,7 @@ def getListings(conn):
 
 
 #Retrieve the listing corresponding to a given item id.
-def getListing(conn, item_identifier): 
+def get_listing(conn, item_identifier): 
     '''
        Takes a database connection and ID for a particular item in a table. 
        Retrieves all the information for that item from the item table.
@@ -103,7 +117,7 @@ if __name__ == '__main__':
     #result = getListings(conn)
     #result = getListing(conn,1)
     #result = update(conn,1,"Dress","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
-
+    result = delete(conn,34)
     print(result) 
 
 
