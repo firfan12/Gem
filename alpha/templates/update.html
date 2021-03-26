@@ -13,14 +13,21 @@
         You can always delete or update an item listing later.</h5>
     <form target="_blank" class="search" method="POST" action="{{ url_for('listingReturn') }}">
         <div>
+            <label>Item ID:
+                <input class="" type="number" name="itemID" value="{{ listing.item_id }}" disabled>
+            </label>
+        </div>
+        <br>
+        <div>
             <label>Item Name (model, make, and/or brand):
-                <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
+                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_name }}" name="name">
             </label>
         </div>
         <br>
         <div> 
-            <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
+            <p>Categories: Currently checked - {{ listing.category }}</p>
             <div>
+                <!--Add "checked=True" for a checked box.-->
                 <label>
                     <input type=checkbox name="category" value="Clothing">
                     Clothing
@@ -83,13 +90,12 @@
         <br>
         <div> 
             <label> Item Description:
-                <input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required
-                        name="description">
+                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_description }}" name="description">
             </label>
         </div>
         <br>
         <div> 
-            <p>Condition:</p>
+            <p>Condition: Currently checked - {{ listing.item_condition }}</p>
             <div>
                 <label> 
                     <input required type="radio" name="condition" value="Brand New">
@@ -113,7 +119,7 @@
         <!-- can only select one option: sell for now -->
         <br>
         <div> 
-            <p>Available for:</p>
+            <p>Available for: Currently checked - {{ listing.sellmode }}</p>
             <div>
                 <label> 
                     <input type="checkbox" name="sellmode" value="For Sale">
@@ -136,12 +142,12 @@
         <br>
         <div> 
             <label>Price in dollars:
-                <input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price" min="0">
+                <input class="w3-input w3-padding-16" type="number" value="{{ listing.price }}" name="price" min="0">
             </label>
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" type="submit">Update</button>
+            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="update">Update</button>
         </div>
     </form>
 </div>

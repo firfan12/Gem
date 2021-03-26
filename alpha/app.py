@@ -92,6 +92,7 @@ def createListing():
     '''
     return render_template("listing_form.html", page_title='Create a listing',update=False)
 
+#Unfinished.
 @app.route("/updatelisting/<int:itemID>")
 def updateListing(itemID):
     '''
@@ -100,8 +101,6 @@ def updateListing(itemID):
     conn = dbi.connect()
     listingForUpdate = listing.getListing(conn,itemID)
     return render_template("update.html",listing = listingForUpdate,page_title="Update Listing")
-    #listing = listing.getListing(itemID)
-    #return render_template("update.html",listing = listing,page_title="Update Listing")
 
 
 #Doesn't work, not finished implementing!
@@ -137,14 +136,13 @@ def query():
 @app.route("/listing/",methods=['POST','GET'])
 def listingReturn():
     '''
-        This route displays the result of the item, whether it has been inserted or updated.
+        This route displays the result of the item, whether it has been inserted, updated, or deleted.
     '''
     conn = dbi.connect()
     if request.method == 'POST':
-        #Retreive all submitted listing information.
+        #Retreive common values from all forms.
         name = request.form['name']
-        #Get list of categories.
-        categories = (',').join(request.form.getlist('category'))       
+        categories = (',').join(request.form.getlist('category'))
         description = request.form['description']
         condition = request.form['condition']
         price = request.form['price']
@@ -152,24 +150,49 @@ def listingReturn():
             free = True
         else:
             free = False
-        #Get list of sellmodes.
         sellmode = (',').join(request.form.getlist('sellmode'))
-        #Insert into DB, retreive itemID: 
-       
-        itemID = listing.insertListing(conn,name,categories,free, description, 
-                condition,price,sellmode) 
-        print(itemID)
-        flash("Congrats! Your item is now listed for sale")
-        return redirect(url_for('itemPage',item_identifier = itemID))      
+     
+        #If seller wishes to insert a listing.
+        if request.form['submit'] == 'insert':
+            #Get all submitted listing information.
+            #name = request.form['name']
+            #Get list of categories.
+            #categories = (',').join(request.form.getlist('category'))       
+            # description = request.form['description']
+            # condition = request.form['condition']
+            # price = request.form['price']
+            # if (price == 0): 
+            #     free = True
+            # else:
+            #     free = False
+            #Get list of sellmodes.
+            #sellmode = (',').join(request.form.getlist('sellmode'))
+            #Insert into DB, retreive itemID.
+            itemID = listing.insertListing(conn,name,categories,free,description,condition,price,sellmode) 
+            flash("Congrats! Your item is now listed for sale")
+            return redirect(url_for('itemPage',item_identifier = itemID))
+        #If the seller wishes to update.
+        elif request.form['submit'] == 'update':
+            #Get values specific to update form.
+            #status = request.form['status']
+            itemID = request.form['itemID']
+            print(itemID)
+            return redirect(url_for('itemPage',item_identifier = itemID))
+            #Update listing.
+            #updatedItem = update(conn,itemID)
+            #Redirect to the item page; flash a message about update.
+        #elif request.form['submit'] == 'delete':
+            #Retreive the item_id.
+            #Delete the listing.
+            #Redirect to home page; flash a message telling the user their item has been deleted.
 
-#Does some initializing, including saying what database to use
+#Initialize
 @app.before_first_request
 def init_db():
     dbi.cache_cnf()
-    # set this local variable to 'wmdb' or your personal or team db
     db_to_use =  'gem_db'
     dbi.use(db_to_use)
-    print('will connect to {}'.format(db_to_use))  #for testing purposes
+    print('will connect to {}'.format(db_to_use))
 
 
 if __name__ == '__main__':

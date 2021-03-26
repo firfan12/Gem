@@ -16,8 +16,30 @@ sellerID = "rarango@wellesley.edu"
 #     curs.execute('''select last_insert_id()''')
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
+def insertListing(conn,name,category,free,description,condition,price,sellmode):
+    '''
+       Takes a database connection, item name (str), item categories (str), 
+       if the item is free (boolean), item description (str), 
+       item condition (str), item price (int), and if the item is 
+       for sell/rent/trade (str). 
+       Inserts all of the information into the item table in the database.
+       Returns the ID of that item, as IDs are autoincremented.
+    '''
+    status = 'Still Available'
+    curs = dbi.dict_cursor(conn)
+    #For now, image not implemented. Using hardcoded image for the draft.
+    curs.execute('''
+        insert into item(item_name,seller_id,category,free,status,item_condition,
+                        item_description,price, sellmode)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+        [name,sellerID,category,free,status,condition,description,price,sellmode]) 
+    conn.commit()
+    curs.execute('''select last_insert_id()''')
+    itemID = curs.fetchone()
+    return itemID['last_insert_id()']
 
-def update(conn,id,name,category,free,description,condition,price, sellmode):
+#Update a listing.
+def update(conn,itemID,name,category,free,description,condition,price,sellmode):
     '''
         Takes a database connection, the item ID (int), item name (str), 
         item categories (str), if the item is free (boolean), 
@@ -26,15 +48,14 @@ def update(conn,id,name,category,free,description,condition,price, sellmode):
         Updates the values of the specified item in item table.
         Returns the a dictionary with all of the item's updated information.
     '''
+    print(sellmode)
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-                update item set name=%s,category=%s,free=%s,description=%s,condition=%s,price=%s,sellmode=%s
+                update item set item_name=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
-                [name,category,free,description,condition,price,sellmode,id]
-                )
-    result = getListing(conn,id)
+                [name,category,free,description,condition,price,sellmode,itemID])
+    result = getListing(conn,itemID)
     return result
-
 
 #Delete listing.
     #Will implement later. 
@@ -70,34 +91,6 @@ def getListing(conn, item_identifier):
     results = curs.fetchone()
     return results
 
-
-#Insert new listing; returns the auto-incremented ID of that listing.
-#Draft:
-def insertListing(conn,name,category,free,description,condition,price, sellmode):
-    '''
-       Takes a database connection, item name (str), item categories (str), 
-       if the item is free (boolean), item description (str), 
-       item condition (str), item price (int), and if the item is 
-       for sell/rent/trade (str). 
-       Inserts all of the information into the item table in the database.
-       Returns the ID of that item, as IDs are autoincremented.
-    '''
-    status = 'Still Available'
-    curs = dbi.dict_cursor(conn)
-    #For now, image not implemented. Using hardcoded image for the draft.
-    curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,
-                        item_description,price, sellmode)
-        values (%s,%s,%s,%s,%s,%s,%s, %s, %s)''',
-        [name,sellerID,category,free,status,condition,description,price, sellmode]) 
-    conn.commit()
-    curs.execute('''select last_insert_id()''')
-    itemID = curs.fetchone()
-    return itemID['last_insert_id()']
-
-   
-
-
 #Testing.
 if __name__ == '__main__':
     dbi.cache_cnf()  
@@ -105,14 +98,12 @@ if __name__ == '__main__':
     conn = dbi.connect()
     #result = getListing(conn,5)
     #result = getListings(conn)
-    #print(len(result))
-    result = insertListing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
-    #print(result.f)
+    #result = insertListing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #result = insertListing(conn,"shirt","red")
-
     #result = getListings(conn)
-    #print(result)
-    #print(len(result))
+    #result = getListing(conn,1)
+    #result = update(conn,1,"Dress","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
+
     print(result) 
 
 
