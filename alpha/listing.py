@@ -5,7 +5,7 @@
 import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
-sellerID = "rarango@wellesley.edu"
+sellerID = "rarango"
 #insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 #inserting manually in terminal
 
@@ -48,12 +48,12 @@ def update(conn,itemID,name,category,free,description,condition,price,sellmode):
         Updates the values of the specified item in item table.
         Returns the a dictionary with all of the item's updated information.
     '''
-    print(sellmode)
     curs = dbi.dict_cursor(conn)
     curs.execute('''
                 update item set item_name=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
                 [name,category,free,description,condition,price,sellmode,itemID])
+    conn.commit()
     result = getListing(conn,itemID)
     return result
 

@@ -3,8 +3,29 @@ use gem_db;
 drop table if exists comments; 
 drop table if exists favorites;
 drop table if exists tags;
+drop table if exists uploads;
+drop table if exists userpass;
 drop table if exists item;
 drop table if exists person;  
+
+create table userpass(
+    user varchar(30) not null,
+    hashed char(60),
+    unique(user),
+    index(user),
+    primary key (user),
+    foreign key (user) references person(email)
+        on delete cascade 
+        on update cascade
+);
+ 
+create table uploads (
+    seller_id varchar(30) not null,
+    filename varchar(50) not null primary key,
+    foreign key (seller_id) references person(email) 
+        on delete cascade 
+        on update cascade
+);
 
 create table person(
    name varchar (30) not null,

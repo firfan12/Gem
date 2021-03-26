@@ -15,6 +15,7 @@ import cs304dbi as dbi
 import listing  #imports helper methods
 # import cs304dbi_sqlite3 as dbi
 import random
+import bcrypt
 
 app.secret_key = 'your secret here'
 # replace that with a random key
@@ -33,6 +34,7 @@ def index():
        Renders the home page.
     '''
     return render_template('main.html',page_title='Gem Home Page')
+
 
 #show user's all of their favorites listings on one  page
 @app.route('/favorites/')
@@ -53,26 +55,27 @@ def profile():
     '''
     return render_template('profile.html',page_title='User Profile')
 
+@app.route('/login/')
+def login():
+    '''
+    Renders the template for the login page
+    '''
+    return render_template('login.html', page_title='Login')
+
 
 #creates the feed for the user to view all listings 
 #of items that are not sold
-@app.route("/listings/")
+@app.route("/listings/") #methods=['POST','GET']?
 def listings():
     '''
        Renders a page will all listings stated as "Still Available".
     '''
     conn = dbi.connect()
     results =  listing.getListings(conn)
-    # price = results['price']
-    # name = results['item_name']
-    # image = results['item_name']
     return render_template("listings.html", listings = results, page_title='All listings')
 
-#renders the page for an individual item listing
-#Checks if the viewer is the buyer or seller.
-#If the viewer is a seller, then display the update and delete buttons.
-#If the viewer is a buyer, then 
-@app.route("/item/<item_identifier>")
+
+@app.route("/item/<item_identifier>",methods=['POST','GET'])
 def itemPage(item_identifier):
     '''
        Renders a page for a single item.
@@ -80,12 +83,41 @@ def itemPage(item_identifier):
        If the viewer is a buyer, then displays a "contact" button to contact the seller.
     '''
     conn = dbi.connect()
-    item = listing.getListing(conn, item_identifier)
-    return render_template("item_page.html", listing = item, page_title='One listing')
+    #If the request is GET.
+    if request.method == 'GET': 
+        #Get the database dictionary of the item given its ID.
+        item = listing.getListing(conn, item_identifier)
+        return render_template("item_page.html", listing = item, page_title='One listing')
+    #If the request is POST.
+    if request.method == "POST":
+        #If the seller wishes to update their listing.
+        if request.form['submit'] == 'update':
+            name = request.form['name']
+            categories = (',').join(request.form.getlist('category'))
+            description = request.form['description']
+            condition = request.form['condition']
+            price = request.form['price']
+            if (price == 0): 
+                free = True
+            else:
+                free = False
+            sellmode = (',').join(request.form.getlist('sellmode'))
+            #status = request.form['status']
+            #Update the listing.
+            updatedItem = listing.update(conn,item_identifier,name,categories,free,description,condition,price,sellmode)
+            flash('Your item has been updated!')
+            #Re-render the item page with the correct values.
+            return render_template('item_page.html',listing=updatedItem,page_title="Updated Listing")
+        #If the user wishes to delete their listing.
+        #elif request.form['submit'] == 'delete':
+            #Retreive the item_id.
+            #Delete the listing.
+            #Redirect to home page; flash a message telling the user their item has been deleted.
+
 
 
 #renders the page where one can create a listing
-@app.route("/createlisting/")
+@app.route("/createlisting/") #methods=['POST','GET']?
 def createListing():
     '''
        Renders the form to create a listing.
@@ -103,10 +135,9 @@ def updateListing(itemID):
     return render_template("update.html",listing = listingForUpdate,page_title="Update Listing")
 
 
-#Doesn't work, not finished implementing!
-#Processes users query for a certain movie or person. 
+#Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.
-@app.route('/search/')
+@app.route('/search/') #methods=['POST','GET']?
 def query():
     '''
        Renders search.
@@ -115,76 +146,63 @@ def query():
     curs = dbi.dict_cursor(conn)
     query = request.args['search']
    
+    #will include searching tags in the beta if have time 
     # get all listings in db that has this query as part of its name
-    sql = '''select * from item where item_name like  %s'''
-    vals = ['%' + query + '%']
+    sql = '''select * from item where item_name like %s 
+    or category like %s or item_description like %s''' #joining bc dn want duplicates
+    vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
     curs.execute(sql, vals)
     results = curs.fetchall()
-    #process query based on how items from the database matched the query:
+    
+    #process query based on how many items from the database matched the query:
     if len(results) == 0:  
-        return render_template('no_query_result.html', page_title ='No Query Results', 
-                                message = "Sorry, no items were found with that name")  
-    elif len(results) == 1: 
+        flash("Sorry, no items were found!")
+        #fig. out how to remove other flashed messages when flashing this one!
+        #i.e. it still said 21 listings found when tried to find a different listing
+        return redirect(request.referrer)
+        #return render_template('no_query_result.html', page_title ='No Query Results')
+                                # message = "Sorry, no items were found with that name")                     
+    elif len(results) == 1:  #works
         item_id = results[0].get("item_id")
+        flash("Search results: one item found") 
         return redirect(url_for('itemPage', item_identifier = item_id))
     elif len(results) > 1:
-        return render_template('listings.html', page_title ='Listings Found',listings = results)
+        flash("Search results: {number_items} item found".format(number_items = len(results)))
+        return render_template('listings.html', listings = results, page_title ='Listings Found')
 
+ 
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
 @app.route("/listing/",methods=['POST','GET'])
 def listingReturn():
     '''
-        This route displays the result of the item, whether it has been inserted, updated, or deleted.
+        Gets information from the "Insert Listing" form.
+        Inserts the new listing, and returns the auto-incremented ID of that listing.
+        Redirects to the itemPage/ID url.
     '''
     conn = dbi.connect()
     if request.method == 'POST':
-        #Retreive common values from all forms.
-        name = request.form['name']
-        categories = (',').join(request.form.getlist('category'))
-        description = request.form['description']
-        condition = request.form['condition']
-        price = request.form['price']
-        if (price == 0): 
-            free = True
-        else:
-            free = False
-        sellmode = (',').join(request.form.getlist('sellmode'))
-     
         #If seller wishes to insert a listing.
         if request.form['submit'] == 'insert':
-            #Get all submitted listing information.
-            #name = request.form['name']
-            #Get list of categories.
-            #categories = (',').join(request.form.getlist('category'))       
-            # description = request.form['description']
-            # condition = request.form['condition']
-            # price = request.form['price']
-            # if (price == 0): 
-            #     free = True
-            # else:
-            #     free = False
-            #Get list of sellmodes.
-            #sellmode = (',').join(request.form.getlist('sellmode'))
+            #Retrieve values from the "Insert Listing" form.
+            name = request.form['name']
+            categories = (',').join(request.form.getlist('category'))
+            description = request.form['description']
+            condition = request.form['condition']
+            price = request.form['price']
+            if (price == 0): 
+                free = True
+            else:
+                free = False
+            sellmode = (',').join(request.form.getlist('sellmode'))
             #Insert into DB, retreive itemID.
             itemID = listing.insertListing(conn,name,categories,free,description,condition,price,sellmode) 
             flash("Congrats! Your item is now listed for sale")
+            #Redirect to itemPage URL with the item ID.
             return redirect(url_for('itemPage',item_identifier = itemID))
-        #If the seller wishes to update.
-        elif request.form['submit'] == 'update':
-            #Get values specific to update form.
-            #status = request.form['status']
-            itemID = request.form['itemID']
-            print(itemID)
-            return redirect(url_for('itemPage',item_identifier = itemID))
-            #Update listing.
-            #updatedItem = update(conn,itemID)
-            #Redirect to the item page; flash a message about update.
-        #elif request.form['submit'] == 'delete':
-            #Retreive the item_id.
-            #Delete the listing.
-            #Redirect to home page; flash a message telling the user their item has been deleted.
+        #Do I need to through an error here?
+        return redirect('<p>Error</p>')
 
 #Initialize
 @app.before_first_request

@@ -12,7 +12,11 @@
     <!-- ordered style sheets in a way that creates appropriate overriding of styles.  -->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+    <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     {% block head_stuff %} {% endblock %}
+    
+    
   </head>
 
 
@@ -23,12 +27,16 @@
       <a href="{{url_for('listings')}}">Items for Sale</a>
       <a href="{{url_for('favorites')}}">Favorites</a>
       <a href="{{url_for('profile')}}">Profile</a>
+      <a href="{{url_for('login')}}"> Log In</a>
 
       <!-- search bar doesn't work yet;have not implemented fully so please ignore -->
-      <!-- <form class="search_bar" action="/search/">
-        <input type="text" placeholder="Search.." name="search">
-        <button type="submit"><i class="fa fa-search"></i></button>
-      </form> -->
+      <div class="search-container">
+        <form action="/search/">
+          <input type="text" placeholder="Search.." required name="search">
+          <button type="submit"><i class="fa fa-search"></i></button>
+          
+        </form>
+      </div>
     </nav>
     
 
