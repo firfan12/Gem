@@ -60,12 +60,14 @@ def update(conn,item_identifier,name,category,free,description,condition,price,s
 #Delete listing.
 def delete(conn,item_identifier):
     '''
+        Deletes an item from the database as per the user's request.
+        Different from setting an item to 'Awaiting Pickup' or 'Sold'.
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''
             delete from item
             where item_id = %s''',
-            [itemID])
+            [item_identifier])
     conn.commit()
     result = get_listing(conn,item_identifier)
     if result == None:

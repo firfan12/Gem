@@ -202,10 +202,6 @@ def item_page(item_identifier):
             #Delete the listing.
             #Redirect to home page; flash a message telling the user their item has been deleted.
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 0f06827d8812a236df9d4b1126155e0709fe1e33
 #renders the page where one can create a listing
 @app.route("/createlisting/") #methods=['POST','GET']?
 def create_listing():
@@ -224,20 +220,26 @@ def update_listing(item_identifier):
     item = listing.get_listing(conn,item_identifier)
     return render_template("update.html",listing = item,page_title="Update Listing")
 
-<<<<<<< HEAD
 @app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
 def delete_listing(item_identifier):
     '''
+        Renders a page that asks the user if they are sure they want to delete this listing.
+        Different from setting status to 'Awaiting Pickup' or 'Sold'.
     '''
     conn = dbi.connect()
-    listing_delete = listing.get_listing(conn,itemID)
-    return render_template("delete.html", listing = listing_delete)
+    if request.method == 'GET':
+        listing_delete = listing.get_listing(conn,item_identifier)
+        return render_template("delete.html", listing = listing_delete)
+    elif request.method == 'POST':
+        deleted_listing = listing.delete(conn,item_identifier)
+        print(deleted_listing)
+        flash('Your listing was successfully deleted.')
+        return redirect(url_for('index'))
+
+        
+        
 
 #Processes users query for a certain item.
-=======
-#Doesn't work, not finished implementing!
-#Processes users query for a certain movie or person. 
->>>>>>> 0f06827d8812a236df9d4b1126155e0709fe1e33
 #Handles queries differently based on whether the query has any matches in the database.
 @app.route('/search/') #methods=['POST','GET']?
 def query():
