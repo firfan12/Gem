@@ -48,7 +48,7 @@ def join():
             passwd2 = request.form['password2']
             if passwd1 != passwd2:
                 flash('Passwords do not match. Please try again.')
-                return redirect( url_for('register'))
+                return redirect( url_for('join'))
             hashed = bcrypt.hashpw(passwd1.encode('utf-8'),
                                 bcrypt.gensalt())
             hashed_str = hashed.decode('utf-8')
