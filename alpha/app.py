@@ -16,6 +16,7 @@ import listing  #imports helper methods
 # import cs304dbi_sqlite3 as dbi
 import random
 import bcrypt
+import logins
 
 app.secret_key = 'your secret here'
 # replace that with a random key
@@ -35,7 +36,6 @@ def index():
     '''
     return render_template('main.html',page_title='Gem Home Page')
 
-
 #show user's all of their favorites listings on one  page
 @app.route('/favorites/')
 def favorites():
@@ -43,7 +43,6 @@ def favorites():
        Renders favorites.
     '''
     return render_template('favorites.html',page_title='Favorite Items')
-
 
 #Doesn't work, not finished implementing!
 #show user's their profile. profile.html not implemented yet, 
@@ -55,13 +54,102 @@ def profile():
     '''
     return render_template('profile.html',page_title='User Profile')
 
-@app.route('/login/')
+@app.route('/login/',methods=["GET","POST"])
 def login():
-    '''
-    Renders the template for the login page
-    '''
-    return render_template('login.html', page_title='Login')
+    conn = dbi.connect()
+    if request.method == 'GET':
+        return render_template('login.html')
+    elif request.method == 'POST':
+        
+        username = request.form['username']
+        passwd = request.form['password']
+        user = logins.get_user(conn,username)
+        if len(user) == 0:
+            flash('Username not found. Try again!')
+            return redirect( url_for('login'))
+        else:
+            flash('User exists!')
+            return redirect( url_for('index'))
 
+        '''hashed = row['hashed']
+        print('database has hashed: {} {}'.format(hashed,type(hashed)))
+        print('form supplied passwd: {} {}'.format(passwd,type(passwd)))
+        hashed2 = bcrypt.hashpw(passwd.encode('utf-8'),
+                                hashed.encode('utf-8'))
+        hashed2_str = hashed2.decode('utf-8')
+        print('rehash is: {} {}'.format(hashed2_str,type(hashed2_str)))
+        if hashed2_str == hashed:
+            print('they match!')
+            flash('successfully logged in as '+username)
+            session['username'] = username
+            session['uid'] = row['uid']
+            session['logged_in'] = True
+            session['visits'] = 1
+            return render_template('login.html')
+        else:
+            flash('login incorrect. Try again or join')
+            return redirect( url_for('index'))
+        #except Exception as err:
+            #flash('form submission error '+str(err))
+            #return redirect( url_for('index') )
+
+    #return render_template('login.html', page_title='Login')'''
+
+@app.route('/join/', methods=["POST"])
+def join():
+    try:
+        return render_template('login.html')
+        username = request.form['username']
+        passwd1 = request.form['password1']
+        passwd2 = request.form['password2']
+        if passwd1 != passwd2:
+            flash('passwords do not match')
+            return redirect( url_for('index'))
+        hashed = bcrypt.hashpw(passwd1.encode('utf-8'),
+                               bcrypt.gensalt())
+        hashed_str = hashed.decode('utf-8')
+        print(passwd1, type(passwd1), hashed, hashed_str)
+        conn = dbi.connect()
+        curs = dbi.cursor(conn)
+        try:
+            curs.execute('''INSERT INTO userpass(uid,username,hashed)
+                            VALUES(null,%s,%s)''',
+                         [username, hashed_str])
+            conn.commit()
+        except Exception as err:
+            flash('That username is taken: {}'.format(repr(err)))
+            return redirect(url_for('index'))
+        curs.execute('select last_insert_id()')
+        row = curs.fetchone()
+        uid = row[0]
+        flash('FYI, you were issued UID {}'.format(uid))
+        session['username'] = username
+        session['uid'] = uid
+        session['logged_in'] = True
+        session['visits'] = 1
+        return redirect( url_for('user', username=username) )
+    except Exception as err:
+        flash('form submission error '+str(err))
+        return redirect( url_for('index') )
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
 
 #creates the feed for the user to view all listings 
 #of items that are not sold
@@ -92,7 +180,6 @@ def itemPage(item_identifier):
     item = listing.getListing(conn, item_identifier)
     return render_template("item_page.html", listing = item, page_title='One listing')
 
-
 #renders the page where one can create a listing
 @app.route("/createlisting/")
 def createListing():
@@ -111,7 +198,6 @@ def updateListing(itemID):
     return render_template("update.html",listing = listingForUpdate,page_title="Update Listing")
     #listing = listing.getListing(itemID)
     #return render_template("update.html",listing = listing,page_title="Update Listing")
-
 
 #Doesn't work, not finished implementing!
 #Processes users query for a certain movie or person. 
@@ -179,7 +265,6 @@ def init_db():
     db_to_use =  'gem_db'
     dbi.use(db_to_use)
     print('will connect to {}'.format(db_to_use))  #for testing purposes
-
 
 if __name__ == '__main__':
     dbi.cache_cnf()  

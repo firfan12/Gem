@@ -5,7 +5,7 @@
 import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
-sellerID = "rarango@wellesley.edu"
+sellerID = "rarango"
 #insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 #inserting manually in terminal
 
