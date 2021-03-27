@@ -6,17 +6,36 @@
 
 {% block main_content %}
 
+<!-- feedback for listing form:  -->
+<!-- set default values for the db for when someone doesn't enter info somewhere on listing form in db
+or handle special cases where user does not enter input -->
+
 <div class="w3-container w3-padding-64" id="listingform">
     <h1>Sell your stuff that you no longer use! </h1><br>
     <h5>Have stuff in your room that you never use? List it for sale and make some $$!
         You can always delete or update an item listing later.</h5>
-    <form target="_blank" class="search" method="POST" action="{{ url_for('listingReturn') }}">
+    <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}">
+        
+        <br>
+        <form action="http://localhost:5000/uploader" method="post" enctype = "multipart/form-data">
+            <input type = "file" name = "file" />
+            <input type = "submit" value = "Upload"/>    
+        <form>
+
+        <br>
+        <br>
+
         <div>
             <label>Item Name (model, make, and/or brand):
                 <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
             </label>
         </div>
         <br>
+        <div>
+
+    
+        </div>
+
         <div> 
             <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
             <div>
@@ -140,8 +159,7 @@
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" 
-            type="submit">Create listing</button>
+            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="insert">Create listing</button>
         </div>
     </form>
 </div>

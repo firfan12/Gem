@@ -5,22 +5,40 @@
 {% endblock %}
 
 {% block main_content %}
-<p>This needs to be fixed for the update page.</p>
-<p>Listing: {{ listing }}</p>
+
 <div class="w3-container w3-padding-64" id="listingform">
     <h1>Sell your stuff that you no longer use! </h1><br>
     <h5>Have stuff in your room that you never use? List it for sale and make some $$!
         You can always delete or update an item listing later.</h5>
-    <form target="_blank" class="search" method="POST" action="{{ url_for('listingReturn') }}">
+    <form target="_blank" class="search" method="POST" action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
+        <div>
+            <p>Status (currently: {{ listing.status }}):</p>
+            <label>
+                <input type="radio" value="Still Available" name="status">
+                Still Available
+            </label>
+            <br>
+            <label>
+                <input type="radio" value="Awaiting Pickup" name="status">
+                Awaiting Pickup
+            </label>
+            <br>
+            <label>
+                <input type="radio" value="Sold" name="status">
+                Sold
+            </label>
+        </div>
+        <br>
         <div>
             <label>Item Name (model, make, and/or brand):
-                <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
+                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_name }}" name="name">
             </label>
         </div>
         <br>
         <div> 
-            <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
+            <p>Categories (currently: {{ listing.category }})</p>
             <div>
+                <!--Add "checked=True" for a checked box.-->
                 <label>
                     <input type=checkbox name="category" value="Clothing">
                     Clothing
@@ -83,13 +101,12 @@
         <br>
         <div> 
             <label> Item Description:
-                <input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required
-                        name="description">
+                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_description }}" name="description">
             </label>
         </div>
         <br>
         <div> 
-            <p>Condition:</p>
+            <p>Condition: (currently: {{ listing.item_condition }})</p>
             <div>
                 <label> 
                     <input required type="radio" name="condition" value="Brand New">
@@ -113,7 +130,7 @@
         <!-- can only select one option: sell for now -->
         <br>
         <div> 
-            <p>Available for:</p>
+            <p>Available for: (currently: {{ listing.sellmode }})</p>
             <div>
                 <label> 
                     <input type="checkbox" name="sellmode" value="For Sale">
@@ -136,12 +153,12 @@
         <br>
         <div> 
             <label>Price in dollars:
-                <input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price" min="0">
+                <input class="w3-input w3-padding-16" type="number" value="{{ listing.price }}" name="price" min="0">
             </label>
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" type="submit">Update</button>
+            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="update">Update</button>
         </div>
     </form>
 </div>
