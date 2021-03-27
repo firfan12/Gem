@@ -7,18 +7,14 @@
 
 <body>
 
-  <h2>Log In</h2>
+  <h2>Register</h2>
 
-<form id="loginform" action="{{url_for('login')}}" method="post">
-    <p><label>Username: <input type="text" name="username" required pattern="^\w+$"></label></p>
-    <p><label>Password: <input type="password" name="password" required></label></p>
+  <form id="joinform" action="{{url_for('join')}}" method="post">
+    <p><label>Username: <input type="text" name="username" required></label></p>
+    <p><label>Password: <input type="password" name="password1" required></label></p>
+    <p><label>Password again: <input type="password" name="password2" required></label></p>
     <p><button type="submit">Submit</button></p>
 </form>
-</body>
-
-<div>
-  <p>Don't have an account? <a href="/join/">Click here to register</a></p>
-</div>
 
 {% endblock %}
 

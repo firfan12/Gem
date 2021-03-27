@@ -35,6 +35,105 @@ def index():
     '''
     return render_template('main.html',page_title='Gem Home Page')
 
+@app.route('/join/', methods=["POST", "GET"])
+def join():
+    if request.method == 'GET':
+        return render_template('register.html', page_title='Join Gem')
+    
+    if request.method == 'POST':
+        try:
+            username = request.form['username']
+            passwd1 = request.form['password1']
+            passwd2 = request.form['password2']
+            if passwd1 != passwd2:
+                flash('Passwords do not match. Please try again.')
+                return redirect( url_for('register'))
+            hashed = bcrypt.hashpw(passwd1.encode('utf-8'),
+                                bcrypt.gensalt())
+            hashed_str = hashed.decode('utf-8')
+            print(passwd1, type(passwd1), hashed, hashed_str)
+            conn = dbi.connect()
+            curs = dbi.cursor(conn)
+            try:
+                curs.execute('''INSERT INTO person(email)
+                                VALUES(%s)''',
+                            [username])
+                curs.execute('''INSERT INTO userpass(user,hashed)
+                                VALUES(%s,%s)''',
+                            [username, hashed_str])
+                conn.commit()
+            except Exception as err:
+                flash('That username is taken. Please pick a different username')
+                return redirect(url_for('join'))
+            curs.execute('select last_insert_id()')
+            row = curs.fetchone()
+            session['username'] = username
+            session['logged_in'] = True
+            session['visits'] = 1
+            return redirect(url_for('profile'))
+            #return redirect( url_for('user', username=username) )
+        except Exception as err:
+            flash('form submission error '+str(err))
+            return redirect( url_for('index') )
+
+@app.route('/login/', methods=["POST", "GET"])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html', page_title='Log In To Gem')   
+    if request.method == 'POST':
+        try:
+            username = request.form['username']
+            passwd = request.form['password']
+            conn = dbi.connect()
+            curs = dbi.dict_cursor(conn)
+            curs.execute('''SELECT hashed
+                        FROM userpass
+                        WHERE user = %s''',
+                        [username])
+            row = curs.fetchone()
+            if row is None:
+                # Same response as wrong password,
+                # so no information about what went wrong
+                flash('Login incorrect. Try again or join')
+                return redirect( url_for('login'))
+            hashed = row['hashed']
+            print('database has hashed: {} {}'.format(hashed,type(hashed)))
+            print('form supplied passwd: {} {}'.format(passwd,type(passwd)))
+            hashed2 = bcrypt.hashpw(passwd.encode('utf-8'),
+                                    hashed.encode('utf-8'))
+            hashed2_str = hashed2.decode('utf-8')
+            print('rehash is: {} {}'.format(hashed2_str,type(hashed2_str)))
+            if hashed2_str == hashed:
+                print('they match!')
+                flash('Successfully logged in as '+username)
+                session['username'] = username
+                session['logged_in'] = True
+                session['visits'] = 1
+                return redirect(url_for('profile'))
+                #return redirect( url_for('user', username=username) )
+            else:
+                flash('Login incorrect. Try again or join')
+                return redirect( url_for('login'))
+        except Exception as err:
+            flash('form submission error '+str(err))
+            return redirect( url_for('index') )
+
+@app.route('/logout/')
+def logout():
+    try:
+        if 'username' in session:
+            username = session['username']
+            session.pop('username')
+            session.pop('logged_in')
+            flash('You are logged out')
+            return redirect(url_for('index'))
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('index') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('index') )
+
 
 #show user's all of their favorites listings on one  page
 @app.route('/favorites/')
@@ -53,15 +152,22 @@ def profile():
     '''
        Renders the template for the profile.
     '''
-    return render_template('profile.html',page_title='User Profile')
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            username = session['username']
+            session['visits'] = 1+int(session['visits'])
+            return render_template('profile.html',
+                                   page_title='My App: Welcome {}'.format(username),
+                                   name=username,
+                                   visits=session['visits'])
 
-@app.route('/login/')
-def login():
-    '''
-    Renders the template for the login page
-    '''
-    return render_template('login.html', page_title='Login')
-
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
 
 #creates the feed for the user to view all listings 
 #of items that are not sold
@@ -70,13 +176,24 @@ def listings():
     '''
        Renders a page will all listings stated as "Still Available".
     '''
-    conn = dbi.connect()
-    results =  listing.getListings(conn)
+
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            conn = dbi.connect()
+            results =  listing.getListings(conn)
+            return render_template("listings.html", listings = results, page_title='All listings')
+
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
     # price = results['price']
     # name = results['item_name']
     # image = results['item_name']
-    return render_template("listings.html", listings = results, page_title='All listings')
-
 #renders the page for an individual item listing
 #Checks if the viewer is the buyer or seller.
 #If the viewer is a seller, then display the update and delete buttons.
