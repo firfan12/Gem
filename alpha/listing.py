@@ -39,7 +39,7 @@ def insert_listing(conn,name,category,free,description,condition,price,sellmode)
     return itemID['last_insert_id()']
 
 #Update a listing.
-def update(conn,item_identifier,name,category,free,description,condition,price,sellmode):
+def update(conn,item_identifier,status,name,category,free,description,condition,price,sellmode):
     '''
         Takes a database connection, the item ID (int), item name (str), 
         item categories (str), if the item is free (boolean), 
@@ -50,9 +50,9 @@ def update(conn,item_identifier,name,category,free,description,condition,price,s
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-                update item set item_name=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
+                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
-                [name,category,free,description,condition,price,sellmode,item_identifier])
+                [name,status,category,free,description,condition,price,sellmode,item_identifier])
     conn.commit()
     result = get_listing(conn,item_identifier)
     return result
@@ -118,8 +118,8 @@ if __name__ == '__main__':
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)
     #result = getListing(conn,1)
-    #result = update(conn,1,"Dress","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
-    result = delete(conn,34)
+    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
+    #result = delete(conn,34)
     print(result) 
 
 

@@ -190,17 +190,12 @@ def item_page(item_identifier):
             else:
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
-            #status = request.form['status']
+            status = request.form['status']
             #Update the listing.
-            updated_listing = listing.update(conn,item_identifier,name,categories,free,description,condition,price,sellmode)
+            updated_listing = listing.update(conn,item_identifier,status,name,categories,free,description,condition,price,sellmode)
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
             return render_template('item_page.html',listing=updated_listing,page_title="Updated Listing")
-        #If the user wishes to delete their listing.
-        #elif request.form['submit'] == 'delete':
-            #Retreive the item_id.
-            #Delete the listing.
-            #Redirect to home page; flash a message telling the user their item has been deleted.
 
 #renders the page where one can create a listing
 @app.route("/createlisting/") #methods=['POST','GET']?
