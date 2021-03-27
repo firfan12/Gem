@@ -14,13 +14,32 @@ or handle special cases where user does not enter input -->
     <h1>Sell your stuff that you no longer use! </h1><br>
     <h5>Have stuff in your room that you never use? List it for sale and make some $$!
         You can always delete or update an item listing later.</h5>
+<<<<<<< HEAD
     <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}">
+=======
+    <form target="_blank" class="search" method="POST" action="{{ url_for('listingReturn') }}">
+        
+        <br>
+        <form action="http://localhost:5000/uploader" method="post" enctype = "multipart/form-data">
+            <input type = "file" name = "file" />
+            <input type = "submit" value = "Upload"/>    
+        <form>
+
+        <br>
+        <br>
+
+>>>>>>> 0f06827d8812a236df9d4b1126155e0709fe1e33
         <div>
             <label>Item Name (model, make, and/or brand):
                 <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
             </label>
         </div>
         <br>
+        <div>
+
+    
+        </div>
+
         <div> 
             <p>Category: Have to click clothing for the draft version. Cannot click other categories (yet)</p>
             <div>
@@ -144,7 +163,12 @@ or handle special cases where user does not enter input -->
         </div>
         <br>
         <div>
+<<<<<<< HEAD
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name = "submit" value = "create">Create listing</button>
+=======
             <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="insert">Create listing</button>
+>>>>>>> 8c7668c8e1ff114731663ef75e1f4644471c7ecc
         </div>
     </form>
 </div>
