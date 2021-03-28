@@ -28,6 +28,7 @@ def insert_listing(conn,name,category,free,description,condition,price,sellmode)
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
     #For now, image not implemented. Using hardcoded image for the draft.
+
     curs.execute('''
         insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode)
         values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
@@ -88,6 +89,19 @@ def get_listings(conn):
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from item where status <> 'Sold' '''
     curs.execute(sql)
+    results = curs.fetchall()
+    return results
+
+
+#Retrieve items that current user favorited
+def get_favorites(conn): 
+    '''
+       Retrieve items that current user favorited.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from favorites where buyer_id = %s'''
+    val = [sellerID]
+    curs.execute(sql, val)
     results = curs.fetchall()
     return results
 
