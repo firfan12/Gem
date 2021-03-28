@@ -5,7 +5,7 @@
 import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
-sellerID = "firfan"
+#sellerID = "firfan"
 #insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 #inserting manually in terminal
 
@@ -16,7 +16,7 @@ sellerID = "firfan"
 #     curs.execute('''select last_insert_id()''')
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
-def insert_listing(conn,name,category,free,description,condition,price,sellmode):
+def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode):
     '''
        Takes a database connection, item name (str), item categories (str), 
        if the item is free (boolean), item description (str), 
@@ -31,7 +31,7 @@ def insert_listing(conn,name,category,free,description,condition,price,sellmode)
     curs.execute('''
         insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode)
         values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
-        [name,sellerID,category,free,status,condition,description,price,sellmode]) 
+        [name,seller_id,category,free,status,condition,description,price,sellmode]) 
     conn.commit()
     curs.execute('''select last_insert_id()''')
     itemID = curs.fetchone()
