@@ -18,12 +18,17 @@ or handle special cases where user does not enter input -->
     <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}">
         
         <br>
+        {% block main %}
         <form action="http://localhost:5000/uploader" method="post" enctype = "multipart/form-data">
             <input type = "file" name = "file" />
             <input type = "submit" value = "Upload"/>    
-        <form>
+        </form>
 
-        <br>
+        {% if nm != '' and src != '' %}
+        <p>Last upload: {{nm}}</p>
+        <p> <img src="{{src}}"></p>
+        {% endif %}
+        {% endblock %}
         <br>
 
         <div>
