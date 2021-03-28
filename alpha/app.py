@@ -242,9 +242,10 @@ def item_page(item_identifier):
             status = request.form['status']
             #Update the listing.
             updated_listing = listing.update(conn,item_identifier,status,name,categories,free,description,condition,price,sellmode)
+            username = session['username']
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
-            return render_template('item_page.html',listing=updated_listing,page_title="Updated Listing")
+            return render_template('item_page.html',username=username,listing=updated_listing,page_title="Updated Listing")
 
 #renders the page where one can create a listing
 @app.route("/createlisting/") #methods=['POST','GET']?
@@ -344,8 +345,9 @@ def listing_return():
             else:
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
+            seller_id = session['username']
             #Insert into DB, retreive itemID.
-            item_identifier = listing.insert_listing(conn,name,categories,free,description,condition,price,sellmode) 
+            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,description,condition,price,sellmode) 
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
             return redirect(url_for('item_page',item_identifier = item_identifier))
