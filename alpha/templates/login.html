@@ -1,28 +1,35 @@
 {% extends "base.html" %}
+
+<!-- additional styles -->
 {% block head_stuff %}
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+<link rel='stylesheet' href="{{url_for('static', filename = 'login.css')}}">
 {% endblock %}
+
 
 {% block main_content %}
+  <div class="hero-image">
+    <div class="hero-text">
+  
+  
+      <h1>Log In</h1>
 
-<body>
+      <form id="loginform" action="{{url_for('login')}}" method="post">
+          <p><label>Username: <input type="text" name="username" required pattern="^\w+$"></label></p>
+          <p><label>Password: <input type="password" name="password" required></label></p>
+          <p><button value = "login" type="submit">Submit</button></p>
+      </form>
+      
 
-  <h2>Log In</h2>
+        <p>Don't have an account? <a href="/join/">Click here to register</a></p>
+   
 
-<form id="loginform" action="{{url_for('login')}}" method="post">
-    <p><label>Username: <input type="text" name="username" required pattern="^\w+$"></label></p>
-    <p><label>Password: <input type="password" name="password" required></label></p>
-    <p><button value = "login" type="submit">Submit</button></p>
-</form>
-</body>
-
-<div>
-  <p>Don't have an account? <a href="/join/">Click here to register</a></p>
+  </div>
 </div>
-
 {% endblock %}
 
-{% block jquery_scripts %}
+
+{% block end_scripts %}
 <script>
 $("#joinform").on('submit', function (event) {
      var pw1 = $(this).find('[name=password1]').val();
