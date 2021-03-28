@@ -136,13 +136,6 @@ def logout():
         return redirect( url_for('index') )
 
 
-#show user's all of their favorites listings on one  page
-@app.route('/favorites/')
-def favorites():
-    '''
-       Renders favorites.
-    '''
-    return render_template('favorites.html',page_title='Favorite Items')
 
 #Doesn't work, not finished implementing!
 #show user's their profile. profile.html not implemented yet, 
@@ -358,6 +351,34 @@ def listing_return():
             return redirect(url_for('item_page',item_identifier = item_identifier))
         #Do I need to through an error here?
         return redirect('<p>Error</p>')
+
+
+
+#Renders page with feed showing the user all their favorited items
+@app.route("/favorites/") 
+def favorites():
+    '''
+       Renders page with feed showing the user all their favorited items
+    '''
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            conn = dbi.connect()
+            results =  listing.get_favorites(conn)
+            # print("Here is the session username:")
+            # print(session['username'])
+            return render_template("favorites.html", listings = results, page_title='Favorite items')
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
+
+
+
+
 
 #Initialize
 @app.before_first_request
