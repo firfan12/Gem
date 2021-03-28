@@ -168,6 +168,7 @@ def profile():
     except Exception as err:
         flash('some kind of error '+str(err))
         return redirect( url_for('login') )
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -193,12 +194,13 @@ def listings():
     '''
        Renders a page will all listings stated as "Still Available".
     '''
-
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
             conn = dbi.connect()
-            results =  listing.getListings(conn)
+            results =  listing.get_listings(conn)
+            print("Here is the session username:")
+            print(session['username'])
             return render_template("listings.html", listings = results, page_title='All listings')
 
         else:
@@ -211,17 +213,11 @@ def listings():
     # price = results['price']
     # name = results['item_name']
     # image = results['item_name']
+
 #renders the page for an individual item listing
 #Checks if the viewer is the buyer or seller.
 #If the viewer is a seller, then display the update and delete buttons.
 #If the viewer is a buyer, then 
-@app.route("/item/<item_identifier>")
-def itemPage(item_identifier):
-    conn = dbi.connect()
-    results =  listing.get_listings(conn)
-    return render_template("listings.html", listings = results, page_title='All listings')
-
-
 @app.route("/item/<item_identifier>",methods=['POST','GET'])
 def item_page(item_identifier):
     '''
@@ -234,7 +230,8 @@ def item_page(item_identifier):
     if request.method == 'GET': 
         #Get the database dictionary of the item given its ID.
         item = listing.get_listing(conn, item_identifier)
-        return render_template("item_page.html", listing = item, page_title='One listing')
+        username = session['username']
+        return render_template("item_page.html",username=username,listing = item, page_title='One listing')
     #If the request is POST.
     if request.method == "POST":
         #If the seller wishes to update their listing.

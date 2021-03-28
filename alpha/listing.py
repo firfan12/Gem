@@ -5,7 +5,7 @@
 import cs304dbi as dbi
 
 #For the time being, there is one seller and her ID is:
-sellerID = "rarango"
+sellerID = "firfan"
 #insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
 #inserting manually in terminal
 
@@ -29,8 +29,7 @@ def insert_listing(conn,name,category,free,description,condition,price,sellmode)
     curs = dbi.dict_cursor(conn)
     #For now, image not implemented. Using hardcoded image for the draft.
     curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,
-                        item_description,price, sellmode)
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode)
         values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
         [name,sellerID,category,free,status,condition,description,price,sellmode]) 
     conn.commit()
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     conn = dbi.connect()
     #result = getListing(conn,5)
     #result = getListings(conn)
-    #result = insertListing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
+    result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)
     #result = getListing(conn,1)

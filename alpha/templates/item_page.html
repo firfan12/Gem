@@ -47,16 +47,17 @@
    
     <!--Implement some type of for loop to determine whether the user a buyer or seller. If seller, display button below.-->
     <!--Update Button-->
-    <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">
-        <button class="w3-button w3-light-grey w3-section center">
-            Update
-        </button>
-    </a>
+    {% if username == listing.seller_id %}
+        <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Update
+            </button>
+        </a>
 
-    <a href = "{{ url_for('delete_listing',item_identifier=listing.item_id) }}">
-        <button class="w3-button w3-light-grey w3-section center">
-            Delete
-        </button>
-    </a>
-
+        <a href = "{{ url_for('delete_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Delete
+            </button>
+        </a>
+    {% endif %}
 {% endblock %}
