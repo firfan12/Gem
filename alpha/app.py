@@ -152,22 +152,25 @@ def profile():
     '''
        Renders the template for the profile.
     '''
+    conn = dbi.connect()
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
             username = session['username']
             session['visits'] = 1+int(session['visits'])
+            my_listings = listing.get_my_listings(conn,username)
             return render_template('profile.html',
                                    page_title='My App: Welcome {}'.format(username),
                                    name=username,
-                                   visits=session['visits'])
+                                   visits=session['visits'],
+                                   listings=my_listings)
 
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
+        return redirect( url_for('login'))
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -287,9 +290,6 @@ def delete_listing(item_identifier):
         print(deleted_listing)
         flash('Your listing was successfully deleted.')
         return redirect(url_for('index'))
-
-        
-        
 
 #Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.

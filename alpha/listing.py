@@ -106,6 +106,15 @@ def get_listing(conn, item_identifier):
     results = curs.fetchone()
     return results
 
+#Get listings for a particular seller.
+def get_my_listings(conn, username):
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+            select * from item where seller_id = %s''',
+            [username])
+    results = curs.fetchall()
+    return results
+
 #Testing.
 if __name__ == '__main__':
     dbi.cache_cnf()  
@@ -113,12 +122,13 @@ if __name__ == '__main__':
     conn = dbi.connect()
     #result = getListing(conn,5)
     #result = getListings(conn)
-    result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
+    #result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)
     #result = getListing(conn,1)
     #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
     #result = delete(conn,34)
+    #result = get_my_listings(conn,'rarango')
     print(result) 
 
 
