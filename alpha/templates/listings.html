@@ -9,18 +9,12 @@
 
 {% block main_content %}
     <h1> Listings</h1>
-
-      <!--   
-  <input type="submit" name="submit" value="update">
-        <input type="submit" name="submit" value="delete"> -->
-
-
     <!-- the select category menu -->   
     <div class = "menu-form"> 
         <form method=POST action="{{url_for('listings')}}" >
           <label for="menu-category">Search by category:</label>
           <select required name="menu-category" placeholder = "Choose One">
-              <!--Fills out the drop down menu with incomplete movies-->
+              <!--Fills out the drop down menu with the item categories-->
               {% for category in categories %}
               <option value="{{category}}">{{category}}</option>   
               {% endfor %}
@@ -28,8 +22,7 @@
           <input type="submit" name="submit-btn" value="Choose">
         
 
-        <!-- the order by menu -->     
-        
+        <!-- the menu for ordering by price-->     
         <label for="menu-order">Order by:</label>
         <select name="menu-order">
             <!--Fills out the drop down menu with incomplete movies-->
@@ -42,8 +35,7 @@
     </div>  
 
 
-
-    <!-- "listings" contains all of the listings in the database not marked as "Sold" -->
+    <!--listings to display-->
     {% for listing in listings %}
 
     <!-- separate divs for formatting reasons: 
@@ -55,15 +47,16 @@
           clicks it, it will save the item to their list of favorite items, and these 
           favorites of theirs will be recorded in the database. For now, just appears as a 
           toggle on each item that one can click. Will implement favoriting of items later on. -->
-        <label class="switch">
+        <!-- <label class="switch">
           <input type="checkbox">
           <span class="slider round"></span>
-        </label> 
+        </label>  -->
 
         <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
-          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" width="600" height="400">
+          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" 
+              width="600" height="400">
         </a>
-        <!-- listing info that will show for each listing -->
+        <!-- listing info that will show for each listing to display -->
         <div class="desc">{{listing.item_name}}</div>
         <div class="desc">${{listing.price}}</div>
       </div>

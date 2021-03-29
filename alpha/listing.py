@@ -31,7 +31,8 @@ def insert_listing(conn,name,seller_id,category,free,description,condition,price
     #For now, image not implemented. Using hardcoded image for the draft.
 
     curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode,image)
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,
+                        price,sellmode,image)
         values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
         [name,seller_id,category,free,status,condition,description,price,sellmode,image]) 
     conn.commit()
@@ -227,7 +228,8 @@ if __name__ == '__main__':
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)
     #result = getListing(conn,1)
-    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
+    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,
+    # "Pink",'Brand New',12.12,'For Sale,For Rent')
     #result = delete(conn,34)
     #result = get_my_listings(conn,'rarango')
     print(result) 

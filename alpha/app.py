@@ -271,7 +271,8 @@ def item_page(item_identifier):
         #Get the database dictionary of the item given its ID.
         item = listing.get_listing(conn, item_identifier)
         username = session['username']
-        return render_template("item_page.html",username=username,listing = item, page_title='One listing')
+        return render_template("item_page.html",username=username,listing = item, 
+                                page_title='One listing')
     #If the request is POST.
     if request.method == "POST":
         #If the seller wishes to update their listing.
@@ -288,11 +289,13 @@ def item_page(item_identifier):
             sellmode = (',').join(request.form.getlist('sellmode'))
             status = request.form['status']
             #Update the listing.
-            updated_listing = listing.update(conn,item_identifier,status,name,categories,free,description,condition,price,sellmode)
+            updated_listing = listing.update(conn,item_identifier,status,name,categories,free,
+                                description,condition,price,sellmode)
             username = session['username']
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
-            return render_template('item_page.html',username=username,listing=updated_listing,page_title="Updated Listing") 
+            return render_template('item_page.html',username=username,listing=updated_listing,
+                                page_title="Updated Listing") 
 
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
@@ -340,7 +343,8 @@ def listing_return():
             sellmode = (',').join(request.form.getlist('sellmode'))
             seller_id = session['username']
             #Insert into DB, retreive itemID.
-            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,description,condition,price,sellmode,image) 
+            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,
+                                description,condition,price,sellmode,image) 
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
             return redirect(url_for('item_page',item_identifier = item_identifier))
@@ -423,6 +427,9 @@ def query():
     '''
        Renders search.
     '''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low')
     try:
         if 'username' in session:
             username = session['username']
@@ -433,28 +440,28 @@ def query():
             query = request.args['search']
         
             #will include searching tags in the beta if have time 
-            # get all listings in db that has this query as part of its name
+            # get all listings in db that has this query as part of its name, description, 
+            #or category
             sql = '''select * from item where item_name like %s 
-            or category like %s or item_description like %s''' #joining bc dn want duplicates
+            or category like %s or item_description like %s''' #joining because don't want duplicates
             vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
             curs.execute(sql, vals)
             results = curs.fetchall()
             
             #process query based on how many items from the database matched the query:
             if len(results) == 0:  
-                flash("Sorry, no items were found!")
-                #fig. out how to remove other flashed messages when flashing this one!
-                #i.e. it still said 21 listings found when tried to find a different listing
-                return redirect(request.referrer)
-                #return render_template('no_query_result.html', page_title ='No Query Results')
-                                        # message = "Sorry, no items were found with that name")                     
-            elif len(results) == 1:  #works
+                flash("Sorry, no items were found!") #
+                return redirect(request.referrer)                 
+            elif len(results) == 1:  
                 item_id = results[0].get("item_id")
                 flash("Search results: one item found") 
-                return redirect(url_for('itemPage', item_identifier = item_id))
+                return redirect(url_for('item_page', item_identifier = item_id))
             elif len(results) > 1:
                 flash("Search results: {number_items} item found".format(number_items = len(results)))
-                return render_template('listings.html', listings = results, page_title ='Listings Found')
+                return render_template('listings.html', listings = results, 
+                                        page_title ='Listings Found',
+                                     categories = item_categories, 
+                                     possible_orderings = item_orderings )
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
@@ -482,34 +489,6 @@ def favorites():
     except Exception as err:
         flash('some kind of error '+str(err))
         return redirect( url_for('login') )
-
-'''@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-
-@app.route('/pics/')
-def pics():
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute('select filename from uploads ')
-    listings =  listing.get_listings(conn)
-    pics = curs.fetchall()
-    return render_template('listings.html',listings=listings[0])'''
 
 #Initialize
 @app.before_first_request

@@ -37,12 +37,13 @@
         </div>
 
         <div class="w3-col l6 w3-padding-large">
-            <img src= "{{url_for('pic',image=listing.image)}}" class = "w3-round w3-image w3-opacity-min"
+            <img src= "{{url_for('pic',image=listing.image)}}" 
+                class = "w3-round w3-image w3-opacity-min"
                 alt="{{listing.item_name}}" style="width:100%"> 
         </div>
     </div>
    
-    <!--Implement some type of for loop to determine whether the user a buyer or seller. If seller, display button below.-->
+    
     <!--Update Button-->
     {% if username == listing.seller_id %}
         <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">

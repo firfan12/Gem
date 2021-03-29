@@ -8,7 +8,7 @@
 {% block main_content %}
 
 <div>
-    <p><a href='/logout/'>Log Out</a></p>
+    <p><a href="{{ url_for('logout') }}">Log Out</a></p>
 </div>
 
 <h1>Your Listings:</h1>
@@ -32,7 +32,8 @@
         <!-- For now, we are hardcoding the image, since have not  implemented storing the 
           image in the database yet. -->
         <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
-          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" width="600" height="400">
+          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" 
+              width="600" height="400">
         </a>
         <!-- listing info that will show for each listing -->
         <div class="desc">{{listing.item_name}}</div>
