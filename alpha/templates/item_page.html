@@ -40,7 +40,8 @@
             <!-- For now, we are hardcoding the image, since still not sure how to save photos that
             users submit. We will implement this functionality later. -->
             <!-- Will implement the image handler (and change to url_for) later for alpha verison -->
-            <img src="../static/images/product1.jpeg" class="w3-round w3-image w3-opacity-min" 
+            <!-- <img src="../static/images/product1.jpeg" class="w3-round w3-image w3-opacity-min"  -->
+            <img src= "{{url_for('pic',image=listing.image)}}" class = "w3-round w3-image w3-opacity-min"
                 alt="{{listing.item_name}}" style="width:100%"> 
         </div>
     </div>

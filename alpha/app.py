@@ -4,7 +4,7 @@
 
 #Establish Routes for Listing Form
 from flask import (Flask, render_template, make_response, url_for, request,
-                   redirect, flash, session, send_from_directory, jsonify)
+                   redirect, flash, session, send_from_directory, jsonify, Response)
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
@@ -17,6 +17,8 @@ import listing  #imports helper methods
 import random
 import bcrypt
 import logins
+import sys, os, random
+import imghdr
 
 app.secret_key = 'your secret here'
 # replace that with a random key
@@ -27,6 +29,8 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
 
 #routes users to the Gem home page
 @app.route('/')
@@ -35,6 +39,28 @@ def index():
        Renders the home page.
     '''
     return render_template('main.html',page_title='Gem Home Page')
+
+@app.route('/pic/<image>')
+def pic(image):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from uploads where filename = %s''',
+        [image])
+    if numrows == 0:
+        flash('No picture for {}'.format(filenamep))
+        return redirect(url_for('index'))
+    row = curs.fetchone()
+    return send_from_directory(app.config['UPLOADS'],row['filename'])
+
+@app.route('/pics/')
+def pics():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''select filename from uploads ''')
+    listings =  listing.get_listings(conn)
+    pics = curs.fetchall()
+    return render_template('listings.html',listings=listings[0])
 
 @app.route('/join/', methods=["POST", "GET"])
 def join():
@@ -340,6 +366,25 @@ def listing_return():
             description = request.form['description']
             condition = request.form['condition']
             price = request.form['price']
+            try:
+                f = request.files['pic']
+                filename = f.filename
+                #ext = user_filename.split('.')[-1]
+                #filename = secure_filename('{}.{}'.format(user_filename,ext))
+                pathname = os.path.join(app.config['UPLOADS'],filename)
+                f.save(pathname)
+            except Exception as err:
+                flash('Upload failed {why}'.format(why=err))
+                return render_template('listing_form.html',src='')
+            seller_id = 'firfan'
+            image = filename
+            conn = dbi.connect()
+            curs = dbi.dict_cursor(conn)
+            curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                   on duplicate key update filename = %s''',
+                     [seller_id,filename,filename])
+            conn.commit()
+            #flash('Upload successful')
             if (price == 0): 
                 free = True
             else:
@@ -347,15 +392,34 @@ def listing_return():
             sellmode = (',').join(request.form.getlist('sellmode'))
             seller_id = session['username']
             #Insert into DB, retreive itemID.
-            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,description,condition,price,sellmode) 
+            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,description,condition,price,sellmode,image) 
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
             return redirect(url_for('item_page',item_identifier = item_identifier))
         #Do I need to through an error here?
         return redirect('<p>Error</p>')
 
-
-
+'''@app.route('/upload/', methods=["GET", "POST"])
+def file_upload():
+    if request.method == 'GET':
+        return render_template('listing_form.html',src='')
+    else:
+        try:
+            #file = int(request.form['file']) # may throw error
+            user_filename = request.files['file'].filename
+            #f = request.files['pic']
+            #user_filename = f.filename
+            
+            do_files('uploads', conn, insert_picfile)
+            listing.insert_picfile(conn, pathname, filename, seller_id)
+            flash('Upload successful')
+            return render_template('listing_form.html',
+                                   src=url_for('pic',file=file),
+                                   file=file)
+        except Exception as err:
+            flash('Upload failed {why}'.format(why=err))
+           return render_template('listing_form.html',src='')
+'''
 #Renders page with feed showing the user all their favorited items
 @app.route("/favorites/") 
 def favorites():

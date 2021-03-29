@@ -3,6 +3,7 @@
 #Rebecca, Christine, Natalie, Fatima
 
 import cs304dbi as dbi
+import os 
 
 #For the time being, there is one seller and her ID is:
 #sellerID = "firfan"
@@ -16,7 +17,7 @@ import cs304dbi as dbi
 #     curs.execute('''select last_insert_id()''')
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
-def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode):
+def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode,image):
     '''
        Takes a database connection, item name (str), item categories (str), 
        if the item is free (boolean), item description (str), 
@@ -30,9 +31,9 @@ def insert_listing(conn,name,seller_id,category,free,description,condition,price
     #For now, image not implemented. Using hardcoded image for the draft.
 
     curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode)
-        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
-        [name,seller_id,category,free,status,condition,description,price,sellmode]) 
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode,image)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+        [name,seller_id,category,free,status,condition,description,price,sellmode,image]) 
     conn.commit()
     curs.execute('''select last_insert_id()''')
     itemID = curs.fetchone()
@@ -119,6 +120,34 @@ def get_listing(conn, item_identifier):
     curs.execute(sql, val)
     results = curs.fetchone()
     return results
+
+def do_files(dirname, conn, func):
+    '''iterates over all files in the given directory (e.g. 'uploads'),
+invoking function on conn, the full pathname, the filename and the
+digits before the dot (e.g. 123.jpq).
+
+    '''
+    for name in os.listdir(dirname):
+        path = os.path.join(dirname, name)
+        if os.path.isfile(path):
+            # note that we are reading a *binary* file not text
+            with open(path,'rb') as f:
+                print('{} of size {}'
+                      .format(path,os.fstat(f.fileno()).st_size))
+            '''nm,ext = name.split('.')'''
+            '''if nm.isdigit():
+                func(conn, path, name, seller_id)'''
+    
+def insert_picfile(conn, path, filename, seller_id):
+    '''Insert name into the picfile table under key nm.'''
+    curs = dbi.cursor(conn)
+    try:
+        curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                   on duplicate key update filename = %s''',
+                     [seller_id,filename,filename])
+        conn.commit()
+    except Exception as err:
+        print('Exception on insert of {}: {}'.format(name, repr(err)))
 
 #Testing.
 if __name__ == '__main__':
