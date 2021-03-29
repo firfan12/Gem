@@ -8,8 +8,6 @@ from flask import (Flask, render_template, make_response, url_for, request,
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
-# one or the other of these. Defaults to MySQL (PyMySQL)
-# change comment characters to switch to SQLite
 
 import cs304dbi as dbi
 import listing  #imports helper methods
@@ -19,6 +17,9 @@ import bcrypt
 import logins
 import sys, os, random
 import imghdr
+
+
+
 
 app.secret_key = 'your secret here'
 # replace that with a random key
@@ -110,7 +111,7 @@ def login():
                 session['username'] = username
                 session['logged_in'] = True
                 session['visits'] = 1
-                return redirect(url_for('profile'))
+                return redirect(url_for('index'))
                 #return redirect( url_for('user', username=username) )
             else:
                 flash('Login incorrect. Try again or join')
@@ -191,14 +192,53 @@ def create_listing():
             conn = dbi.connect()
             results =  listing.get_listings(conn)
             return render_template("listing_form.html", page_title='Create a listing',update=False)
-
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
+    except:
+        print("hi")
+        return "hi"
+         
+#listings by order
+@app.route("/listings/price/<order>", methods=['GET'])
+def listings_by_price(order):
+    '''Renders listings in a certain category, or'''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET': 
+        conn = dbi.connect()
+        #Get item listings for the given category
+        items = listing.get_listings_by_price(conn, order)
+        username = session['username']
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Price', categories = item_categories, 
+        possible_orderings = item_orderings)
+        
 
+
+#listings by category
+@app.route("/listings/category/<category>",methods=['POST','GET'])
+def listings_by_category(category):
+    '''
+       Renders listings in  a given order by price. 
+    '''
+    conn = dbi.connect()
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET': 
+        #Get listings for the given order
+        items = listing.get_listings_by_category(conn, category)
+        username = session['username']
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Order', categories = item_categories, 
+        possible_orderings = item_orderings)
+        # price = results['price']
+        # name = results['item_name']
+        # image = results['item_name']
+
+    
 @app.route('/pic/<image>')
 def pic(image):
     conn = dbi.connect()
@@ -211,6 +251,8 @@ def pic(image):
         return redirect(url_for('index'))
     row = curs.fetchone()
     return send_from_directory(app.config['UPLOADS'],row['filename'])
+
+    
 
 #renders the page for an individual item listing
 #Checks if the viewer is the buyer or seller.
@@ -307,24 +349,43 @@ def listing_return():
 
 #creates the feed for the user to view all listings 
 #of items that are not sold
-@app.route("/listings/") #methods=['POST','GET']?
+@app.route("/listings/", methods=['POST','GET'])
 def listings():
     '''
        Renders a page will all listings stated as "Still Available".
     '''
-    try:
-        # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            conn = dbi.connect()
-            results =  listing.get_listings(conn)
-            return render_template("listings.html", listings = results, page_title='All listings')
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET':
+        try:
+            # don't trust the URL; it's only there for decoration
+            if 'username' in session:
+                conn = dbi.connect()
+                results =  listing.get_listings(conn)
+                print("Here is the session username:")
+                print(session['username'])
+                return render_template("listings.html", listings = results, page_title='All listings', 
+                categories = item_categories, possible_orderings = orderings)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('login') )
+        except Exception as err:
+            flash('some kind of error '+str(err))
+    elif request.method == 'POST':
+        action = request.form['submit-btn']
+        if action == "Choose":
+            selected_category = request.form.get("menu-category")
+            return redirect(url_for('listings_by_category', category = selected_category))
+        elif action == "Select":
+            selected_order = request.form['menu-order']
+            if selected_order == orderings[0]:
+                order = "cheap"     
+            elif selected_order == orderings[1]:
+                order = "expensive"
+            return redirect(url_for('listings_by_price', order = order))
 
-        else:
-            flash('You are not logged in. Please log in or join')
-            return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
+
 
     # price = results['price']
     # name = results['item_name']
@@ -363,7 +424,6 @@ def query():
        Renders search.
     '''
     try:
-
         if 'username' in session:
             username = session['username']
             session['visits'] = 1+int(session['visits'])
@@ -412,7 +472,7 @@ def favorites():
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
             conn = dbi.connect()
-            results =  listing.get_favorites(conn)
+            results =  listing.get_favorites(conn, 'username')
             # print("Here is the session username:")
             # print(session['username'])
             return render_template("favorites.html", listings = results, page_title='Favorite items')

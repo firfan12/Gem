@@ -38,3 +38,25 @@ h1 {
     text-align: center;
     padding:2em;
 }
+
+
+/* styles the filter menus: */
+.menu-form { 
+  display: inline-block; 
+  margin: auto;
+  text-align: center;
+  padding-bottom:3em;
+  width: 100%;
+}
+
+.menu-form form { 
+ 
+  padding-bottom: 1em;
+
+}
+
+
+
+
+
+

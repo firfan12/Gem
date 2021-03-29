@@ -51,7 +51,8 @@ def update(conn,item_identifier,status,name,category,free,description,condition,
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
+                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,
+                item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
                 [name,status,category,free,description,condition,price,sellmode,item_identifier])
     conn.commit()
@@ -97,13 +98,14 @@ def get_listings(conn):
 
 
 #Retrieve items that current user favorited
-def get_favorites(conn): 
+def get_favorites(conn, username): 
     '''
        Retrieve items that current user favorited.
     '''
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from favorites where buyer_id = %s'''
-    val = [sellerID]
+    val = [username]
+    
     curs.execute(sql, val)
     results = curs.fetchall()
     return results
@@ -123,6 +125,54 @@ def get_listing(conn, item_identifier):
     results = curs.fetchone()
     return results
 
+
+#Renders a page will all listings stated as "Still Available" in 
+#sorted order, cheapest to most expensive
+def get_listings_by_price(conn, order): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" in sorted order by price. 
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+   
+    if order == "cheap": 
+        curs = dbi.dict_cursor(conn)
+        sql  = '''select  * from item where status <> 'Sold' order by price asc'''
+        curs.execute(sql)
+        results = curs.fetchall()
+        return results
+    elif order == "expensive":
+        curs = dbi.dict_cursor(conn) 
+        sql  = '''select  * from item where status <> 'Sold' order by price desc'''
+        curs.execute(sql)
+        results = curs.fetchall()
+        return results
+    
+
+
+
+   
+
+#Renders a page will all listings stated as "Still Available" for certain category
+def get_listings_by_category(conn, category): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" by category
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from item where status <> 'Sold' and category like %s ''' 
+    val = ["%" + category + "%" ]
+    curs.execute(sql, val)
+    results = curs.fetchall()
+    return results
+
+
+    
 #Get listings for a particular seller.
 def get_my_listings(conn, username):
     '''
@@ -185,4 +235,3 @@ if __name__ == '__main__':
 
 
 
-    
