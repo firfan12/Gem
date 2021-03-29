@@ -40,28 +40,6 @@ def index():
     '''
     return render_template('main.html',page_title='Gem Home Page')
 
-@app.route('/pic/<image>')
-def pic(image):
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    numrows = curs.execute(
-        '''select filename from uploads where filename = %s''',
-        [image])
-    if numrows == 0:
-        flash('No picture for {}'.format(filenamep))
-        return redirect(url_for('index'))
-    row = curs.fetchone()
-    return send_from_directory(app.config['UPLOADS'],row['filename'])
-
-@app.route('/pics/')
-def pics():
-    conn = dbi.connect()
-    curs = dbi.dict_cursor(conn)
-    curs.execute('''select filename from uploads ''')
-    listings =  listing.get_listings(conn)
-    pics = curs.fetchall()
-    return render_template('listings.html',listings=listings[0])
-
 @app.route('/join/', methods=["POST", "GET"])
 def join():
     if request.method == 'GET':
@@ -157,64 +135,18 @@ def logout():
         flash('some kind of error '+str(err))
         return redirect( url_for('index') )
 
-
-
-#Doesn't work, not finished implementing!
-#show user's their profile. profile.html not implemented yet, 
-# so this route mostly not implemented yet
-@app.route('/profile/')
-def profile():
+#renders the page where one can create a listing
+@app.route("/createlisting/") #methods=['POST','GET']?
+def create_listing():
     '''
-       Renders the template for the profile.
-    '''
-    try:
-        # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            username = session['username']
-            session['visits'] = 1+int(session['visits'])
-            return render_template('profile.html',
-                                   page_title='Gem: Welcome {}'.format(username),
-                                   name=username,
-                                   visits=session['visits'])
-
-        else:
-            flash('You are not logged in. Please log in or join')
-            return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-#creates the feed for the user to view all listings 
-#of items that are not sold
-@app.route("/listings/") #methods=['POST','GET']?
-def listings():
-    '''
-       Renders a page will all listings stated as "Still Available".
+       Renders the form to create a listing.
     '''
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
             conn = dbi.connect()
             results =  listing.get_listings(conn)
-            return render_template("listings.html", listings = results, page_title='All listings')
+            return render_template("listing_form.html", page_title='Create a listing',update=False)
 
         else:
             flash('You are not logged in. Please log in or join')
@@ -223,9 +155,18 @@ def listings():
         flash('some kind of error '+str(err))
         return redirect( url_for('login') )
 
-    # price = results['price']
-    # name = results['item_name']
-    # image = results['item_name']
+@app.route('/pic/<image>')
+def pic(image):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from uploads where filename = %s''',
+        [image])
+    if numrows == 0:
+        flash('No picture for {}'.format(filenamep))
+        return redirect(url_for('index'))
+    row = curs.fetchone()
+    return send_from_directory(app.config['UPLOADS'],row['filename'])
 
 #renders the page for an individual item listing
 #Checks if the viewer is the buyer or seller.
@@ -265,102 +206,8 @@ def item_page(item_identifier):
             username = session['username']
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
-            return render_template('item_page.html',username=username,listing=updated_listing,page_title="Updated Listing")
+            return render_template('item_page.html',username=username,listing=updated_listing,page_title="Updated Listing") 
 
-#renders the page where one can create a listing
-@app.route("/createlisting/") #methods=['POST','GET']?
-def create_listing():
-    '''
-       Renders the form to create a listing.
-    '''
-    try:
-        # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            conn = dbi.connect()
-            results =  listing.get_listings(conn)
-            return render_template("listing_form.html", page_title='Create a listing',update=False)
-
-        else:
-            flash('You are not logged in. Please log in or join')
-            return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
-    
-
-@app.route("/updatelisting/<int:item_identifier>")
-def update_listing(item_identifier):
-    '''
-        Retreives information from database about the listing to be updated.
-        Renders the form to update a listing.
-    '''
-    conn = dbi.connect()
-    item = listing.get_listing(conn,item_identifier)
-    return render_template("update.html",listing = item,page_title="Update Listing")
-
-@app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
-def delete_listing(item_identifier):
-    '''
-        Renders a page that asks the user if they are sure they want to delete this listing.
-        Different from setting status to 'Awaiting Pickup' or 'Sold'.
-    '''
-    conn = dbi.connect()
-    if request.method == 'GET':
-        listing_delete = listing.get_listing(conn,item_identifier)
-        return render_template("delete.html", listing = listing_delete)
-    elif request.method == 'POST':
-        deleted_listing = listing.delete(conn,item_identifier)
-        flash('Your listing was successfully deleted.')
-        return redirect(url_for('index'))
-       
-
-#Processes users query for a certain item.
-#Handles queries differently based on whether the query has any matches in the database.
-@app.route('/search/') #methods=['POST','GET']?
-def query():
-    '''
-       Renders search.
-    '''
-    try:
-
-        if 'username' in session:
-            username = session['username']
-            session['visits'] = 1+int(session['visits'])
-    
-            conn = dbi.connect()
-            curs = dbi.dict_cursor(conn)
-            query = request.args['search']
-        
-            #will include searching tags in the beta if have time 
-            # get all listings in db that has this query as part of its name
-            sql = '''select * from item where item_name like %s 
-            or category like %s or item_description like %s''' #joining bc dn want duplicates
-            vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
-            curs.execute(sql, vals)
-            results = curs.fetchall()
-            
-            #process query based on how many items from the database matched the query:
-            if len(results) == 0:  
-                flash("Sorry, no items were found!")
-                #fig. out how to remove other flashed messages when flashing this one!
-                #i.e. it still said 21 listings found when tried to find a different listing
-                return redirect(request.referrer)
-                #return render_template('no_query_result.html', page_title ='No Query Results')
-                                        # message = "Sorry, no items were found with that name")                     
-            elif len(results) == 1:  #works
-                item_id = results[0].get("item_id")
-                flash("Search results: one item found") 
-                return redirect(url_for('itemPage', item_identifier = item_id))
-            elif len(results) > 1:
-                flash("Search results: {number_items} item found".format(number_items = len(results)))
-                return render_template('listings.html', listings = results, page_title ='Listings Found')
-        else:
-            flash('You are not logged in. Please log in or join')
-            return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
- 
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
 #and tells them that their listing was posted.
@@ -412,29 +259,130 @@ def listing_return():
             #Redirect to itemPage URL with the item ID.
             return redirect(url_for('item_page',item_identifier = item_identifier))
         #Do I need to through an error here?
-        return redirect('<p>Error</p>')
+        return redirect('<p>Error</p>')   
 
-'''@app.route('/upload/', methods=["GET", "POST"])
-def file_upload():
+#creates the feed for the user to view all listings 
+#of items that are not sold
+@app.route("/listings/") #methods=['POST','GET']?
+def listings():
+    '''
+       Renders a page will all listings stated as "Still Available".
+    '''
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            conn = dbi.connect()
+            results =  listing.get_listings(conn)
+            return render_template("listings.html", listings = results, page_title='All listings')
+
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
+    # price = results['price']
+    # name = results['item_name']
+    # image = results['item_name']
+
+@app.route("/updatelisting/<int:item_identifier>")
+def update_listing(item_identifier):
+    '''
+        Retreives information from database about the listing to be updated.
+        Renders the form to update a listing.
+    '''
+    conn = dbi.connect()
+    item = listing.get_listing(conn,item_identifier)
+    return render_template("update.html",listing = item,page_title="Update Listing")
+
+@app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
+def delete_listing(item_identifier):
+    '''
+        Renders a page that asks the user if they are sure they want to delete this listing.
+        Different from setting status to 'Awaiting Pickup' or 'Sold'.
+    '''
+    conn = dbi.connect()
     if request.method == 'GET':
-        return render_template('listing_form.html',src='')
-    else:
-        try:
-            #file = int(request.form['file']) # may throw error
-            user_filename = request.files['file'].filename
-            #f = request.files['pic']
-            #user_filename = f.filename
+        listing_delete = listing.get_listing(conn,item_identifier)
+        return render_template("delete.html", listing = listing_delete)
+    elif request.method == 'POST':
+        deleted_listing = listing.delete(conn,item_identifier)
+        flash('Your listing was successfully deleted.')
+        return redirect(url_for('index'))
+
+#Doesn't work, not finished implementing!
+#show user's their profile. profile.html not implemented yet, 
+# so this route mostly not implemented yet
+@app.route('/profile/')
+def profile():
+    '''
+       Renders the template for the profile.
+    '''
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            username = session['username']
+            session['visits'] = 1+int(session['visits'])
+            return render_template('profile.html',
+                                   page_title='Gem: Welcome {}'.format(username),
+                                   name=username,
+                                   visits=session['visits'])
+
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
+#Processes users query for a certain item.
+#Handles queries differently based on whether the query has any matches in the database.
+@app.route('/search/') #methods=['POST','GET']?
+def query():
+    '''
+       Renders search.
+    '''
+    try:
+
+        if 'username' in session:
+            username = session['username']
+            session['visits'] = 1+int(session['visits'])
+    
+            conn = dbi.connect()
+            curs = dbi.dict_cursor(conn)
+            query = request.args['search']
+        
+            #will include searching tags in the beta if have time 
+            # get all listings in db that has this query as part of its name
+            sql = '''select * from item where item_name like %s 
+            or category like %s or item_description like %s''' #joining bc dn want duplicates
+            vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
+            curs.execute(sql, vals)
+            results = curs.fetchall()
             
-            do_files('uploads', conn, insert_picfile)
-            listing.insert_picfile(conn, pathname, filename, seller_id)
-            flash('Upload successful')
-            return render_template('listing_form.html',
-                                   src=url_for('pic',file=file),
-                                   file=file)
-        except Exception as err:
-            flash('Upload failed {why}'.format(why=err))
-           return render_template('listing_form.html',src='')
-'''
+            #process query based on how many items from the database matched the query:
+            if len(results) == 0:  
+                flash("Sorry, no items were found!")
+                #fig. out how to remove other flashed messages when flashing this one!
+                #i.e. it still said 21 listings found when tried to find a different listing
+                return redirect(request.referrer)
+                #return render_template('no_query_result.html', page_title ='No Query Results')
+                                        # message = "Sorry, no items were found with that name")                     
+            elif len(results) == 1:  #works
+                item_id = results[0].get("item_id")
+                flash("Search results: one item found") 
+                return redirect(url_for('itemPage', item_identifier = item_id))
+            elif len(results) > 1:
+                flash("Search results: {number_items} item found".format(number_items = len(results)))
+                return render_template('listings.html', listings = results, page_title ='Listings Found')
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
 #Renders page with feed showing the user all their favorited items
 @app.route("/favorites/") 
 def favorites():
@@ -456,10 +404,33 @@ def favorites():
         flash('some kind of error '+str(err))
         return redirect( url_for('login') )
 
+'''@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
 
-
-
-
+@app.route('/pics/')
+def pics():
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    curs.execute('select filename from uploads ')
+    listings =  listing.get_listings(conn)
+    pics = curs.fetchall()
+    return render_template('listings.html',listings=listings[0])'''
 
 #Initialize
 @app.before_first_request

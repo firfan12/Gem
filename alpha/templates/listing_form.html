@@ -18,7 +18,7 @@ or handle special cases where user does not enter input -->
     <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}" enctype = "multipart/form-data">
         
         <br>
-            <input type = "file" name = "pic" /> 
+            <input type = "file" name = "pic" required/> 
 
         {% if src != '' %}
         <p> <img src="{{src}}"></p>
