@@ -28,14 +28,13 @@
       <a href="{{url_for('create_listing')}}">List an Item</a>
       <a href="{{url_for('profile')}}">Profile</a>
       <a href="{{url_for('login')}}"> Log In</a>
-      
+      <a href="{{url_for('favorites')}}">Favorites</a>
 
       <!-- search bar doesn't work yet;have not implemented fully so please ignore -->
       <div class="search-container">
         <form action="/search/">
           <input type="text" placeholder="Search.." required name="search">
           <button type="submit"><i class="fa fa-search"></i></button>
-          
         </form>
       </div>
     </nav>
@@ -62,6 +61,9 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     {% block end_scripts %}
     {% endblock %}
+
+
+
 
   </body>
 
