@@ -21,7 +21,8 @@ create table userpass(
  
 create table uploads (
     seller_id varchar(30) not null,
-    filename varchar(50) not null primary key,
+    filename varchar(50) not null,
+    primary key (seller_id, filename),
     foreign key (seller_id) references person(email) 
         on delete cascade 
         on update cascade
