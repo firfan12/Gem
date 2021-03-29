@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block head_stuff %}
-
 <link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
 {% endblock %}
 
@@ -17,23 +16,24 @@ or handle special cases where user does not enter input -->
         You can always delete or update an item listing later.</h5>
     <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}">
         
-        <br>
+        <!-- <br>
         {% block main %}
         <form action="http://localhost:5000/uploader" method="post" enctype = "multipart/form-data">
             <input type = "file" name = "file" />
             <input type = "submit" value = "Upload"/>    
-        </form>
+        </form> -->
 
-        {% if nm != '' and src != '' %}
+        <!-- {% if nm != '' and src != '' %}
         <p>Last upload: {{nm}}</p>
         <p> <img src="{{src}}"></p>
         {% endif %}
         {% endblock %}
-        <br>
+        <br> -->
 
         <div>
             <label>Item Name (model, make, and/or brand):
-                <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="A name for your item" required name="name">
             </label>
         </div>
         <br>
@@ -103,7 +103,8 @@ or handle special cases where user does not enter input -->
         <br>
         <div> 
             <label> Item Description:
-                <input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="Short description of  your item" required
                         name="description">
             </label>
         </div>
@@ -156,12 +157,14 @@ or handle special cases where user does not enter input -->
         <br>
         <div> 
             <label>Price in dollars:
-                <input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price" min="0">
+                <input class="w3-input w3-padding-16" type="number" 
+                placeholder="Price you are selling for" required name="price" min="0">
             </label>
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="insert">Create listing</button>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="insert">Create listing</button>
         </div>
     </form>
 </div>

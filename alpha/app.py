@@ -18,6 +18,9 @@ import random
 import bcrypt
 import logins
 
+
+
+
 app.secret_key = 'your secret here'
 # replace that with a random key
 app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
@@ -110,7 +113,7 @@ def login():
                 session['username'] = username
                 session['logged_in'] = True
                 session['visits'] = 1
-                return redirect(url_for('profile'))
+                return redirect(url_for('index'))
                 #return redirect( url_for('user', username=username) )
             else:
                 flash('Login incorrect. Try again or join')
@@ -182,30 +185,86 @@ def upload_file():
                                     filename=filename))
 #creates the feed for the user to view all listings 
 #of items that are not sold
-@app.route("/listings/") #methods=['POST','GET']?
+@app.route("/listings/", methods=['POST','GET'])
 def listings():
     '''
        Renders a page will all listings stated as "Still Available".
     '''
-    try:
-        # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            conn = dbi.connect()
-            results =  listing.get_listings(conn)
-            print("Here is the session username:")
-            print(session['username'])
-            return render_template("listings.html", listings = results, page_title='All listings')
-
-        else:
-            flash('You are not logged in. Please log in or join')
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET':
+        try:
+            # don't trust the URL; it's only there for decoration
+            if 'username' in session:
+                conn = dbi.connect()
+                results =  listing.get_listings(conn)
+                print("Here is the session username:")
+                print(session['username'])
+                return render_template("listings.html", listings = results, page_title='All listings', 
+                categories = item_categories, possible_orderings = orderings)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('login') )
+        except Exception as err:
+            flash('some kind of error '+str(err))
             return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
+    elif request.method == 'POST':
+        action = request.form['submit-btn']
+        if action == "Choose":
+            selected_category = request.form.get("menu-category")
+            return redirect(url_for('listings_by_category', category = selected_category))
+        elif action == "Select":
+            selected_order = request.form['menu-order']
+            if selected_order == orderings[0]:
+                order = "cheap"     
+            elif selected_order == orderings[1]:
+                order = "expensive"
+            return redirect(url_for('listings_by_price', order = order))
+         
 
+#listings by order
+@app.route("/listings/price/<order>",methods=['POST','GET'])
+def listings_by_price(order):
+    '''
+       Renders listings in a certain category, or
+    '''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET': 
+        conn = dbi.connect()
+        #Get item listings for the given category
+        items = listing.get_listings_by_price(conn, order)
+        username = session['username']
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Price', categories = item_categories, 
+        possible_orderings = item_orderings)
+        
+    
+
+#listings by category
+@app.route("/listings/category/<category>",methods=['POST','GET'])
+def listings_by_category(category):
+    '''
+       Renders listings in  a given order by price. 
+    '''
+    conn = dbi.connect()
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    if request.method == 'GET': 
+        #Get listings for the given order
+        items = listing.get_listings_by_category(conn, category)
+        username = session['username']
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Order', categories = item_categories, 
+        possible_orderings = item_orderings)
     # price = results['price']
     # name = results['item_name']
     # image = results['item_name']
+
+    
 
 #renders the page for an individual item listing
 #Checks if the viewer is the buyer or seller.
@@ -355,30 +414,29 @@ def listing_return():
         return redirect('<p>Error</p>')
 
 
-
+#?
 #Renders page with feed showing the user all their favorited items
 @app.route("/favorites/") 
 def favorites():
     '''
        Renders page with feed showing the user all their favorited items
     '''
-    try:
+    # try:
         # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            conn = dbi.connect()
-            results =  listing.get_favorites(conn)
+        # if 'username' in session:
+    conn = dbi.connect()
+    results =  listing.get_favorites(conn, 'username')
             # print("Here is the session username:")
             # print(session['username'])
-            return render_template("favorites.html", listings = results, page_title='Favorite items')
-        else:
-            flash('You are not logged in. Please log in or join')
-            return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('login') )
+    return render_template("favorites.html", listings = results, page_title='Favorite items')
+        # else:
+        #     flash('You are not logged in. Please log in or join')
+        #     return redirect( url_for('login') )
+    # except Exception as err:
+    #     flash('some kind of error '+str(err))
+    #     return redirect( url_for('login') )
 
-
-
+    
 
 
 

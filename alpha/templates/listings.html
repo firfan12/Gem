@@ -9,6 +9,40 @@
 
 {% block main_content %}
     <h1> Listings</h1>
+
+      <!--   
+  <input type="submit" name="submit" value="update">
+        <input type="submit" name="submit" value="delete"> -->
+
+
+    <!-- the select category menu -->   
+    <div class = "menu-form"> 
+        <form method=POST action="{{url_for('listings')}}" >
+          <label for="menu-category">Search by category:</label>
+          <select required name="menu-category" placeholder = "Choose One">
+              <!--Fills out the drop down menu with incomplete movies-->
+              {% for category in categories %}
+              <option value="{{category}}">{{category}}</option>   
+              {% endfor %}
+          </select>
+          <input type="submit" name="submit-btn" value="Choose">
+        
+
+        <!-- the order by menu -->     
+        
+        <label for="menu-order">Order by:</label>
+        <select name="menu-order">
+            <!--Fills out the drop down menu with incomplete movies-->
+            {% for order in possible_orderings %}
+            <option value="{{order}}">{{order}}</option>   
+            {% endfor %}
+        </select>
+        <input type="submit" name="submit-btn" value="Select">
+        </form>
+    </div>  
+
+
+
     <!-- "listings" contains all of the listings in the database not marked as "Sold" -->
     {% for listing in listings %}
 
