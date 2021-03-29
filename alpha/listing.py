@@ -88,7 +88,9 @@ def get_listings(conn):
        information for those items.
     '''
     curs = dbi.dict_cursor(conn)
-    sql  = '''select  * from item where status <> 'Sold' '''
+    sql  = '''select  * from item 
+            where status <> 'Sold'
+            order by item_id desc'''
     curs.execute(sql)
     results = curs.fetchall()
     return results
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     dbi.use('gem_db')
     conn = dbi.connect()
     #result = getListing(conn,5)
-    #result = getListings(conn)
+    #result = get_listings(conn)
     #result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)

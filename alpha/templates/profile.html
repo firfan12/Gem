@@ -32,7 +32,7 @@
         <!-- For now, we are hardcoding the image, since have not  implemented storing the 
           image in the database yet. -->
         <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
-          <img src="../static/images/product1.jpeg" alt="Birkenstock" width="600" height="400">
+          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" width="600" height="400">
         </a>
         <!-- listing info that will show for each listing -->
         <div class="desc">{{listing.item_name}}</div>
