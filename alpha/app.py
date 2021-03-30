@@ -327,7 +327,7 @@ def listing_return():
             except Exception as err:
                 flash('Upload failed {why}'.format(why=err))
                 return render_template('listing_form.html',src='')
-            seller_id = 'firfan'
+            seller_id = session['username']
             image = filename
             conn = dbi.connect()
             curs = dbi.dict_cursor(conn)
