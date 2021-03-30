@@ -195,10 +195,10 @@ def create_listing():
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
-    except:
-        print("hi")
-        return "hi"
-         
+    except Exception as err:
+        flash('some kind of error {}'.format(str(err)))
+        return redirect( url_for('login') )
+
 #listings by order
 @app.route("/listings/price/<order>", methods=['GET'])
 def listings_by_price(order):
