@@ -10,7 +10,8 @@
     <h1>Sell your stuff that you no longer use! </h1><br>
     <h5>Have stuff in your room that you never use? List it for sale and make some $$!
         You can always delete or update an item listing later.</h5>
-    <form target="_blank" class="search" method="POST" action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
+    <form target="_blank" class="search" method="POST" 
+        action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
         <div>
             <p>Status (currently: {{ listing.status }}):</p>
             <label>
@@ -31,7 +32,8 @@
         <br>
         <div>
             <label>Item Name (model, make, and/or brand):
-                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_name }}" name="name">
+                <input class="w3-input w3-padding-16" type="text" 
+                      value="{{ listing.item_name }}" name="name">
             </label>
         </div>
         <br>
@@ -101,7 +103,8 @@
         <br>
         <div> 
             <label> Item Description:
-                <input class="w3-input w3-padding-16" type="text" value="{{ listing.item_description }}" name="description">
+                <input class="w3-input w3-padding-16" type="text" 
+                    value="{{ listing.item_description }}" name="description">
             </label>
         </div>
         <br>
@@ -127,7 +130,6 @@
             </div>
         </div>
         <!-- Whether the item is for sale, rent, or trade -->
-        <!-- can only select one option: sell for now -->
         <br>
         <div> 
             <p>Available for: (currently: {{ listing.sellmode }})</p>
@@ -153,12 +155,14 @@
         <br>
         <div> 
             <label>Price in dollars:
-                <input class="w3-input w3-padding-16" type="number" value="{{ listing.price }}" name="price" min="0">
+                <input class="w3-input w3-padding-16" type="number" 
+                value="{{ listing.price }}" name="price" min="0">
             </label>
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="update">Update</button>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="update">Update</button>
         </div>
     </form>
 </div>

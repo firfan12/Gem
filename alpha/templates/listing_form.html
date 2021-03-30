@@ -1,34 +1,28 @@
 {% extends "base.html" %}
 
 {% block head_stuff %}
-
 <link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
 {% endblock %}
 
 {% block main_content %}
-
-<!-- feedback for listing form:  -->
-<!-- set default values for the db for when someone doesn't enter info somewhere on listing form in db
-or handle special cases where user does not enter input -->
-
 <div class="w3-container w3-padding-64" id="listingform">
     <h1>Sell your stuff that you no longer use! </h1><br>
     <h5>Have stuff in your room that you never use? List it for sale and make some $$!
         You can always delete or update an item listing later.</h5>
-    <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}">
+    <form target="_blank" class="search" method="POST" action="{{ url_for('listing_return') }}" 
+        enctype = "multipart/form-data">
         
         <br>
-        <form action="http://localhost:5000/uploader" method="post" enctype = "multipart/form-data">
-            <input type = "file" name = "file" />
-            <input type = "submit" value = "Upload"/>    
-        <form>
+            <input type = "file" name = "pic" required/> 
 
-        <br>
-        <br>
+        {% if src != '' %}
+        <p> <img src="{{src}}"></p>
+        {% endif %}
 
         <div>
             <label>Item Name (model, make, and/or brand):
-                <input class="w3-input w3-padding-16" type="text" placeholder="A name for your item" required name="name">
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="A name for your item" required name="name">
             </label>
         </div>
         <br>
@@ -98,7 +92,8 @@ or handle special cases where user does not enter input -->
         <br>
         <div> 
             <label> Item Description:
-                <input class="w3-input w3-padding-16" type="text" placeholder="Short description of  your item" required
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="Short description of  your item" required
                         name="description">
             </label>
         </div>
@@ -125,7 +120,6 @@ or handle special cases where user does not enter input -->
             </div>
         </div>
         <!-- Whether the item is for sale, rent, or trade -->
-        <!-- can only select one option: sell for now -->
         <br>
         <div> 
             <p>Available for:</p>
@@ -151,12 +145,14 @@ or handle special cases where user does not enter input -->
         <br>
         <div> 
             <label>Price in dollars:
-                <input class="w3-input w3-padding-16" type="number" placeholder="Price you are selling for" required name="price" min="0">
+                <input class="w3-input w3-padding-16" type="number" 
+                placeholder="Price you are selling for" required name="price" min="0">
             </label>
         </div>
         <br>
         <div>
-            <button class="w3-button w3-light-grey w3-section center" type="submit" name="submit" value="insert">Create listing</button>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="insert">Create listing</button>
         </div>
     </form>
 </div>

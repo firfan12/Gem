@@ -15,15 +15,14 @@
       <h1>Log In</h1>
 
       <form id="loginform" action="{{url_for('login')}}" method="post">
-          <p><label>Email: <input type="text" name="username" required pattern="^\w+$"></label></p>
+          <p><label>Username: <input type="text" name="username" required ></label></p>
+          <!-- required pattern="^\w+$" -->
           <p><label>Password: <input type="password" name="password" required></label></p>
           <p><button value = "login" type="submit">Submit</button></p>
       </form>
       
-
-        <p>Don't have an account? <a href="/join/">Click here to register</a></p>
+        <p>Don't have an account? <a href="{{url_for('join')}}">Click here to register</a></p>
    
-
   </div>
 </div>
 {% endblock %}

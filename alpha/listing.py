@@ -3,6 +3,7 @@
 #Rebecca, Christine, Natalie, Fatima
 
 import cs304dbi as dbi
+import os 
 
 #For the time being, there is one seller and her ID is:
 #sellerID = "firfan"
@@ -16,7 +17,7 @@ import cs304dbi as dbi
 #     curs.execute('''select last_insert_id()''')
 #     itemID = curs.fetchone()
 #     return itemID['last_insert_id()']
-def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode):
+def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode,image):
     '''
        Takes a database connection, item name (str), item categories (str), 
        if the item is free (boolean), item description (str), 
@@ -30,9 +31,10 @@ def insert_listing(conn,name,seller_id,category,free,description,condition,price
     #For now, image not implemented. Using hardcoded image for the draft.
 
     curs.execute('''
-        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,price,sellmode)
-        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
-        [name,seller_id,category,free,status,condition,description,price,sellmode]) 
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,
+                        price,sellmode,image)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+        [name,seller_id,category,free,status,condition,description,price,sellmode,image]) 
     conn.commit()
     curs.execute('''select last_insert_id()''')
     itemID = curs.fetchone()
@@ -50,7 +52,8 @@ def update(conn,item_identifier,status,name,category,free,description,condition,
     '''
     curs = dbi.dict_cursor(conn)
     curs.execute('''
-                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,item_condition=%s,price=%s,sellmode=%s
+                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,
+                item_condition=%s,price=%s,sellmode=%s
                 where item_id=%s''',
                 [name,status,category,free,description,condition,price,sellmode,item_identifier])
     conn.commit()
@@ -87,20 +90,23 @@ def get_listings(conn):
        information for those items.
     '''
     curs = dbi.dict_cursor(conn)
-    sql  = '''select  * from item where status <> 'Sold' '''
+    sql  = '''select  * from item 
+            where status <> 'Sold'
+            order by item_id desc'''
     curs.execute(sql)
     results = curs.fetchall()
     return results
 
 
 #Retrieve items that current user favorited
-def get_favorites(conn): 
+def get_favorites(conn, username): 
     '''
        Retrieve items that current user favorited.
     '''
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from favorites where buyer_id = %s'''
-    val = [sellerID]
+    val = [username]
+    
     curs.execute(sql, val)
     results = curs.fetchall()
     return results
@@ -120,22 +126,114 @@ def get_listing(conn, item_identifier):
     results = curs.fetchone()
     return results
 
+
+#Renders a page will all listings stated as "Still Available" in 
+#sorted order, cheapest to most expensive
+def get_listings_by_price(conn, order): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" in sorted order by price. 
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+   
+    if order == "cheap": 
+        curs = dbi.dict_cursor(conn)
+        sql  = '''select  * from item where status <> 'Sold' order by price asc'''
+        curs.execute(sql)
+        results = curs.fetchall()
+        return results
+    elif order == "expensive":
+        curs = dbi.dict_cursor(conn) 
+        sql  = '''select  * from item where status <> 'Sold' order by price desc'''
+        curs.execute(sql)
+        results = curs.fetchall()
+        return results
+    
+
+
+
+   
+
+#Renders a page will all listings stated as "Still Available" for certain category
+def get_listings_by_category(conn, category): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" by category
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from item where status <> 'Sold' and category like %s ''' 
+    val = ["%" + category + "%" ]
+    curs.execute(sql, val)
+    results = curs.fetchall()
+    return results
+
+
+    
+#Get listings for a particular seller.
+def get_my_listings(conn, username):
+    '''
+        Takes a database connection and the username of the current user.
+        Retrieves all listings from the item table created by the user.
+        Returns all information in a list of dictionaries, each
+        representing a listing.
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+            select * from item where seller_id = %s''',
+            [username])
+    results = curs.fetchall()
+    return results
+
+def do_files(dirname, conn, func):
+    '''iterates over all files in the given directory (e.g. 'uploads'),
+invoking function on conn, the full pathname, the filename and the
+digits before the dot (e.g. 123.jpq).
+
+    '''
+    for name in os.listdir(dirname):
+        path = os.path.join(dirname, name)
+        if os.path.isfile(path):
+            # note that we are reading a *binary* file not text
+            with open(path,'rb') as f:
+                print('{} of size {}'
+                      .format(path,os.fstat(f.fileno()).st_size))
+            '''nm,ext = name.split('.')'''
+            '''if nm.isdigit():
+                func(conn, path, name, seller_id)'''
+    
+def insert_picfile(conn, path, filename, seller_id):
+    '''Insert name into the picfile table under key nm.'''
+    curs = dbi.cursor(conn)
+    try:
+        curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                   on duplicate key update filename = %s''',
+                     [seller_id,filename,filename])
+        conn.commit()
+    except Exception as err:
+        print('Exception on insert of {}: {}'.format(name, repr(err)))
+
 #Testing.
 if __name__ == '__main__':
     dbi.cache_cnf()  
     dbi.use('gem_db')
     conn = dbi.connect()
     #result = getListing(conn,5)
-    #result = getListings(conn)
-    result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
+    #result = get_listings(conn)
+    #result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
     #result = insertListing(conn,"shirt","red")
     #result = getListings(conn)
     #result = getListing(conn,1)
-    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,"Pink",'Brand New',12.12,'For Sale,For Rent')
+    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,
+    # "Pink",'Brand New',12.12,'For Sale,For Rent')
     #result = delete(conn,34)
+    #result = get_my_listings(conn,'rarango')
     print(result) 
 
 
 
 
-    
