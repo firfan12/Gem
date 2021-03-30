@@ -12,6 +12,17 @@ drop table if exists userpass;
 drop table if exists item;
 drop table if exists person;  
 
+-- initializes the table that stores each user's profile and account information, 
+-- including the information of admin
+create table person(
+   name varchar (30) not null,
+   email varchar (30) not null,
+   password varchar (30) not null,
+   phone varchar (10),
+   admin boolean,
+   location varchar(30),
+   primary key (email)
+);
 
 
 create table userpass(
@@ -33,23 +44,6 @@ create table uploads (
         on delete cascade 
         on update cascade
 );
-
-
-
-
--- initializes the table that stores each user's profile and account information, 
--- including the information of admin
-create table person(
-   name varchar (30) not null,
-   email varchar (30) not null,
-   password varchar (30) not null,
-   phone varchar (10),
-   admin boolean,
-   location varchar(30),
-   primary key (email)
-);
- 
-
 
  -- initializes the table that stores all of the items that are listed on 
 --  the Gem application, and their associated information 
