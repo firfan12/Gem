@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block head_stuff %}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+{% endblock %}
+
+{% block main_content %}
+
+<body>
+
+  <h2>Register</h2>
+
+  <form id="joinform" action="{{url_for('join')}}" method="post">
+    <label>When filling out this form, use your @wellesley.edu credentials. For example, 
+          if your email address is 'abcd@wellesley.edu', then your username is 'abcd'.</label>
+    <p><label>Wellesley email address: <input type="email" name="email" 
+                                         required></label></p>
+                                         <!-- pattern="[a-z.]*[@]\bwellesley.edu"                               -->
+    <p><label>Wellesley username: <input type="text" name="username" required></label></p>
+    <p><label>Password: <input type="password" name="password1" required></label></p>
+    <p><label>Password again: <input type="password" name="password2" required></label></p>
+    <p><button type="submit">Submit</button></p>
+</form>
+
+{% endblock %}
+
+{% block jquery_scripts %}
+<script>
+$("#joinform").on('submit', function (event) {
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     // should also check for length and common words etc
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+         alert("passwords don't match");
+     }
+});
+</script>
+{% endblock %}

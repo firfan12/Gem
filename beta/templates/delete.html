@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block head_stuff %}
+{% endblock %}
+
+{% block main_content %}
+<p>Are you sure you want to delete this post?</p>
+<form method = 'POST' action = '{{ url_for("delete_listing", item_identifier=listing.item_id)}}'>
+    <button type="Submit" name="submit" value="delete">Delete My Listing</button>   
+</form>
+{% endblock %}

@@ -1,0 +1,8 @@
+/* addition styles for login.html */
+/* written by the Gem team */
+/* March 21, 2021 */
+
+/*Creates gradient hero image and makes responsive */
+.hero-image {
+    background-image: url("../static/images/login-background.jpg");
+}

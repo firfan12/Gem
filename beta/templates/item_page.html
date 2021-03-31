@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'item_page_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+    <!-- for loop used to extract the dictionary from the list. 
+    The dictionary contains all  of the listing's information -->
+    <!-- Item Section -->
+    <div class="w3-row w3-padding-64" id="listing_details">
+        <div class="w3-col l6 w3-padding-large">
+            <h1 class="w3-center">Item Name: {{listing.item_name}}</h1><br>
+            
+            <h4>The item is for:</h4>
+            <p class="w3-text-grey">{{listing.sellmode}}</p><br>
+
+            <h4>Seller contact information:</h4>
+            <p class="w3-text-grey">{{listing.seller_id}}</p><br>
+
+            <h4>Category</h4>
+            <p class="w3-text-grey">{{listing.category}}</p><br>
+
+            <!--Status is whether the item is sold already, or not. -->
+            <h4>Status</h4>
+            <p class="w3-text-grey">{{listing.status}}</p><br>
+
+            <h4>Condition</h4>
+            <p class="w3-text-grey">{{listing.item_condition}}</p><br>
+
+            <h4>Description</h4>
+            <p class="w3-text-grey">{{listing.item_description}}</p>
+
+            <h4>Price</h4>
+            <p class="w3-text-grey">{{listing.price}}</p>
+        </div>
+
+        <div class="w3-col l6 w3-padding-large">
+            <img src= "{{url_for('pic',image=listing.image)}}" 
+                class = "w3-round w3-image w3-opacity-min"
+                alt="{{listing.item_name}}" style="width:100%"> 
+        </div>
+    </div>
+   
+    
+    <!--Update Button-->
+    {% if username == listing.seller_id %}
+        <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Update
+            </button>
+        </a>
+
+        <a href = "{{ url_for('delete_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Delete
+            </button>
+        </a>
+    {% endif %}
+{% endblock %}

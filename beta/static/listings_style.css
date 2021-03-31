@@ -1,0 +1,62 @@
+/* addition styles for listing.html */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+
+/* styles the individual listings: */
+div.gallery {
+  border: 1px solid #ccc;
+  margin: 1em;
+}
+
+div.gallery:hover {
+  border: 1px solid #777;
+}
+
+div.gallery img {
+  width: 100%;
+  height: auto;
+}
+
+/* styles the text descriptions: */
+div.desc {
+  padding: 15px;
+  text-align: center;
+}
+
+/* styles all of the listings: */
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* styles the title: */
+h1 { 
+    display: block; 
+    margin: auto;
+    text-align: center;
+    padding:2em;
+}
+
+
+/* styles the filter menus: */
+.menu-form { 
+  display: inline-block; 
+  margin: auto;
+  text-align: center;
+  padding-bottom:3em;
+  width: 100%;
+}
+
+.menu-form form { 
+ 
+  padding-bottom: 1em;
+
+}
+
+
+
+
+
+

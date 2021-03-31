@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+<!-- additional styles -->
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+<link rel='stylesheet' href="{{url_for('static', filename = 'login.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+  <div class="hero-image">
+    <div class="hero-text">
+  
+  
+      <h1>Log In</h1>
+
+      <form id="loginform" action="{{url_for('login')}}" method="post">
+          <p><label>Username: <input type="text" name="username" required ></label></p>
+          <!-- required pattern="^\w+$" -->
+          <p><label>Password: <input type="password" name="password" required></label></p>
+          <p><button value = "login" type="submit">Submit</button></p>
+      </form>
+      
+        <p>Don't have an account? <a href="{{url_for('join')}}">Click here to register</a></p>
+   
+  </div>
+</div>
+{% endblock %}
+
+
+{% block end_scripts %}
+<script>
+$("#joinform").on('submit', function (event) {
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     // should also check for length and common words etc
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+         alert("passwords don't match");
+     }
+});
+</script>
+{% endblock %}
+
