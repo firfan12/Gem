@@ -27,8 +27,13 @@
       <a href="{{url_for('listings')}}">Items for Sale</a>
       <a href="{{url_for('create_listing')}}">List an Item</a>
       <a href="{{url_for('profile')}}">Profile</a>
-      <!-- surround with if statement using jinja 2  -->
-      <a href="{{url_for('login')}}"> Log In</a> 
+      <!-- display log in if user logged out,  and log out if user  logged in -->
+      {% if loggedin %}
+        <a href="{{url_for('logout')}}"> Log Out</a>
+      {% endif %}
+      {% if not loggedin %}
+        <a href="{{url_for('login')}}"> Log In</a> 
+      {% endif %}
       
       <!--<a href="{{url_for('favorites')}}">Favorites</a>-->
 
