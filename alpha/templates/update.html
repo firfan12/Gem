@@ -1,3 +1,9 @@
+<!--
+    File Name: update.html
+    Project: Gem
+    Date: Spring 2021
+    Authors: RA, NR, CP, FI
+-->
 {% extends "base.html" %}
 
 {% block head_stuff %}
@@ -13,21 +19,24 @@
     <form target="_blank" class="search" method="POST" 
         action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
         <div>
-            <p>Status (currently: {{ listing.status }}):</p>
-            <label>
-                <input type="radio" value="Still Available" name="status">
-                Still Available
-            </label>
-            <br>
-            <label>
-                <input type="radio" value="Awaiting Pickup" name="status">
-                Awaiting Pickup
-            </label>
-            <br>
-            <label>
-                <input type="radio" value="Sold" name="status">
-                Sold
-            </label>
+            <p>Status:</p>
+                {% for status in all_statuses: %}
+                    {% if status in listing.status: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}" checked>
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% else: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}">
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% endif %}
+                {% endfor %} 
         </div>
         <br>
         <div>
@@ -37,69 +46,30 @@
             </label>
         </div>
         <br>
+        <div>
+            <p>Image: {{ listing.image }}</p>
+        </div>
+        <br>
         <div> 
-            <p>Categories (currently: {{ listing.category }})</p>
-            <div>
-                <!--Add "checked=True" for a checked box.-->
-                <label>
-                    <input type=checkbox name="category" value="Clothing">
-                    Clothing
-                </label>
-            </div>
-            <div>
-                <label>
-                    <input  type=checkbox name="category" value="Accessories">
-                    Accessories
-                </label>
-            </div>
-            <div>
-                <label>
-                    <input type=checkbox name="category" value="Dorm Essentials">
-                    Dorm Essentials
-                </label>
-            </div>
-            <div>
-                <label>
-                    <input type=checkbox name="category" value="Beauty">
-                    Beauty
-                </label>
-            </div>
-            <div>
-                <label>
-                    <input type=checkbox name="category" value="School Supplies">
-                    School Supplies
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type=checkbox name="category" value="Tech">
-                    Tech
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type=checkbox name="category" value="Furniture">
-                    Furniture
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type=checkbox name="category" value="Textbooks">
-                    Textbooks
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type=checkbox name="category" value="Food">
-                    Food
-                </label>
-            </div>
-            <div>
-                <label> Other: 
-                    <input  type=text name="category10" placeholder="Explanation">
-                </label>
-            </div>
-        </div>   
+            <p>Categories:</p>
+            {% for category in all_categories: %}
+                {% if category in listing.category: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}" checked>
+                        {{ category }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}">
+                        {{ category }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
         <br>
         <div> 
             <label> Item Description:
@@ -109,48 +79,45 @@
         </div>
         <br>
         <div> 
-            <p>Condition: (currently: {{ listing.item_condition }})</p>
-            <div>
-                <label> 
-                    <input required type="radio" name="condition" value="Brand New">
-                    Brand New
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input required type="radio" name="condition" value="Gently Used">
-                    Gently Used
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input required type="radio" name="condition" value="Well Loved">
-                    Well Loved
-                </label>
-            </div>
+            <p>Condition:</p>
+            {% for condition in all_conditions: %}
+                {% if condition in listing.item_condition: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}" checked>
+                        {{ condition }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}">
+                        {{ condition }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
         </div>
-        <!-- Whether the item is for sale, rent, or trade -->
         <br>
         <div> 
-            <p>Available for: (currently: {{ listing.sellmode }})</p>
-            <div>
-                <label> 
-                    <input type="checkbox" name="sellmode" value="For Sale">
-                    Sell
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type="checkbox" name="sellmode" value="For Rent">
-                    Rent
-                </label>
-            </div>
-            <div>
-                <label> 
-                    <input type="checkbox" name="sellmode" value="For Trade">
-                    Trade
-                </label>
-            </div>
+            <p>Available For:</p>
+            {% for sellmode in all_sellmodes %}
+                {% if sellmode in listing.sellmode: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}" checked>
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}">
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
         </div>
         <br>
         <div> 

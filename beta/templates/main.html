@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+<!-- additional styles -->
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+<div class="hero-image">
+  <div class="hero-text">
+
+    <h1>Welcome to Gem!</h1>
+
+    <p>Gem is the one stop shop for buying and selling
+      pre-loved items, within the Wellesley community!
+      Who knows, you might make a little
+      bit of cash, or might find a new pre-loved Gem!</p>
+
+    <!--button on left in center of page -->
+    <a href = "{{ url_for('listings') }}">
+      <button name="submit_button" value="buy">Explore items for sale</button>
+    </a>
+
+    <!--button on right in center of page -->
+    <a href = "{{ url_for('create_listing') }}">
+      <button name="submit_button" value="sell">Sell an Item</button>
+    </a>
+  </div>
+</div>
+{% endblock %}

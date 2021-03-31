@@ -1,0 +1,136 @@
+<!--
+    File Name: update.html
+    Project: Gem
+    Date: Spring 2021
+    Authors: RA, NR, CP, FI
+-->
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
+{% endblock %}
+
+{% block main_content %}
+
+<div class="w3-container w3-padding-64" id="listingform">
+    <h1>Sell your stuff that you no longer use! </h1><br>
+    <h5>Have stuff in your room that you never use? List it for sale and make some $$!
+        You can always delete or update an item listing later.</h5>
+    <form target="_blank" class="search" method="POST" 
+        action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
+        <div>
+            <p>Status:</p>
+                {% for status in all_statuses: %}
+                    {% if status in listing.status: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}" checked>
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% else: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}">
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% endif %}
+                {% endfor %} 
+        </div>
+        <br>
+        <div>
+            <label>Item Name (model, make, and/or brand):
+                <input class="w3-input w3-padding-16" type="text" 
+                      value="{{ listing.item_name }}" name="name">
+            </label>
+        </div>
+        <br>
+        <div>
+            <p>Image: {{ listing.image }}</p>
+        </div>
+        <br>
+        <div> 
+            <p>Categories:</p>
+            {% for category in all_categories: %}
+                {% if category in listing.category: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}" checked>
+                        {{ category }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}">
+                        {{ category }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <label> Item Description:
+                <input class="w3-input w3-padding-16" type="text" 
+                    value="{{ listing.item_description }}" name="description">
+            </label>
+        </div>
+        <br>
+        <div> 
+            <p>Condition:</p>
+            {% for condition in all_conditions: %}
+                {% if condition in listing.item_condition: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}" checked>
+                        {{ condition }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}">
+                        {{ condition }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <p>Available For:</p>
+            {% for sellmode in all_sellmodes %}
+                {% if sellmode in listing.sellmode: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}" checked>
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}">
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <label>Price in dollars:
+                <input class="w3-input w3-padding-16" type="number" 
+                value="{{ listing.price }}" name="price" min="0">
+            </label>
+        </div>
+        <br>
+        <div>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="update">Update</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

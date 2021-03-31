@@ -1,0 +1,13 @@
+
+/* addition styles for item_page.html */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+#listing_details {
+    padding: 2em;
+  }
+
+/* overrides styling in style.css */
+  h4 { 
+    text-align: left;
+}

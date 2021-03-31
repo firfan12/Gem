@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
+{% endblock %}
+
+{% block main_content %}
+<div class="w3-container w3-padding-64" id="listingform">
+    <h1>Sell your stuff that you no longer use! </h1><br>
+    <h5>Have stuff in your room that you never use? List it for sale and make some $$!
+        You can always delete or update an item listing later.</h5>
+    <form target="_blank" class="search" method="POST" action="{{ url_for('create_listing') }}" 
+        enctype = "multipart/form-data">
+        
+        <br>
+            <input type = "file" name = "pic" required/> 
+
+        {% if src != '' %}
+        <p> <img src="{{src}}"></p>
+        <!-- alt = "upload item image here" -->
+        {% endif %}
+
+        <div>
+            <label>Item Name (model, make, and/or brand):
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="A name for your item" required name="name">
+            </label>
+        </div>
+        <br>
+
+        <div> 
+            <p>Category:</p>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Clothing">
+                    Clothing
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input  type=checkbox name="category" value="Accessories">
+                    Accessories
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Dorm Essentials">
+                    Dorm Essentials
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Beauty">
+                    Beauty
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="School Supplies">
+                    School Supplies
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Tech">
+                    Tech
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Furniture">
+                    Furniture
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Textbooks">
+                    Textbooks
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Food">
+                    Food
+                </label>
+            </div>
+            <div>
+                <label> Other: 
+                    <input  type=text name="category10" placeholder="Explanation">
+                </label>
+            </div>
+        </div>   
+        <br>
+        <div> 
+            <label> Item Description:
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="Short description of  your item" required
+                        name="description">
+            </label>
+        </div>
+        <br>
+        <div> 
+            <p>Condition:</p>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Brand New">
+                    Brand New
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Gently Used">
+                    Gently Used
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Well Loved">
+                    Well Loved
+                </label>
+            </div>
+        </div>
+        <!-- Whether the item is for sale, rent, or trade -->
+        <br>
+        <div> 
+            <p>Available for:</p>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Sale">
+                    Sell
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Rent">
+                    Rent
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Trade">
+                    Trade
+                </label>
+            </div>
+        </div>
+        <br>
+        <div> 
+            <label>Price in dollars:
+                <input class="w3-input w3-padding-16" type="number" 
+                placeholder="Price you are selling for" required name="price" min="0">
+            </label>
+        </div>
+        <br>
+        <div>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="insert">Create listing</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
