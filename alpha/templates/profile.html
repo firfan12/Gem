@@ -7,10 +7,6 @@
 
 {% block main_content %}
 
-<div>
-    <p><a href="{{ url_for('logout') }}">Log Out</a></p>
-</div>
-
 <h1>Your Listings:</h1>
     <!-- "listings" contains all of the listings in the database not marked as "Sold" -->
     {% for listing in listings %}

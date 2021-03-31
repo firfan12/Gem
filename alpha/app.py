@@ -39,12 +39,14 @@ def index():
     '''
        Renders the home page.
     '''
-    return render_template('main.html',page_title='Gem Home Page')
+    ifLoggedIn = 'username' in session
+    return render_template('main.html',page_title='Gem Home Page', loggedin = ifLoggedIn )
 
 @app.route('/join/', methods=["POST", "GET"])
 def join():
     if request.method == 'GET':
-        return render_template('register.html', page_title='Join Gem')
+        ifLoggedIn = 'username' in session
+        return render_template('register.html', page_title='Join Gem', loggedin = ifLoggedIn)
     
     if request.method == 'POST':
         try:
@@ -85,7 +87,8 @@ def join():
 @app.route('/login/', methods=["POST", "GET"])
 def login():
     if request.method == 'GET':
-        return render_template('login.html', page_title='Log In To Gem')   
+        ifLoggedIn = 'username' in session 
+        return render_template('login.html', page_title='Log In To Gem', loggedin = ifLoggedIn)   
     if request.method == 'POST':
         try:
             username = request.form['username']
@@ -148,11 +151,12 @@ def profile():
             username = session['username']
             session['visits'] = 1+int(session['visits'])
             my_listings = listing.get_my_listings(conn,username)
+            ifLoggedIn = 'username' in session 
             return render_template('profile.html',
                                    page_title='Gem: Welcome {}'.format(username),
                                    name=username,
                                    visits=session['visits'],
-                                   listings=my_listings)
+                                   listings=my_listings, loggedin = ifLoggedIn)
 
         else:
             flash('You are not logged in. Please log in or join')
@@ -191,7 +195,9 @@ def create_listing():
         if 'username' in session:
             conn = dbi.connect()
             results =  listing.get_listings(conn)
-            return render_template("listing_form.html", page_title='Create a listing',update=False)
+            ifLoggedIn = 'username' in session
+            return render_template("listing_form.html", page_title='Create a listing',update=False, 
+                                    loggedin = ifLoggedIn)
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
@@ -211,9 +217,10 @@ def listings_by_price(order):
         #Get item listings for the given category
         items = listing.get_listings_by_price(conn, order)
         username = session['username']
+        ifLoggedIn = 'username' in session
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Price', categories = item_categories, 
-        possible_orderings = item_orderings)
+        possible_orderings = item_orderings, loggedin = ifLoggedIn)
         
 
 
@@ -231,9 +238,10 @@ def listings_by_category(category):
         #Get listings for the given order
         items = listing.get_listings_by_category(conn, category)
         username = session['username']
+        ifLoggedIn = 'username' in session
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Order', categories = item_categories, 
-        possible_orderings = item_orderings)
+        possible_orderings = item_orderings, loggedin = ifLoggedIn)
         # price = results['price']
         # name = results['item_name']
         # image = results['item_name']
@@ -271,8 +279,9 @@ def item_page(item_identifier):
         #Get the database dictionary of the item given its ID.
         item = listing.get_listing(conn, item_identifier)
         username = session['username']
+        ifLoggedIn = 'username' in session
         return render_template("item_page.html",username=username,listing = item, 
-                                page_title='One listing')
+                                page_title='One listing', loggedin = ifLoggedIn)
     #If the request is POST.
     if request.method == "POST":
         #If the seller wishes to update their listing.
@@ -294,8 +303,9 @@ def item_page(item_identifier):
             username = session['username']
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
+            ifLoggedIn = 'username' in session
             return render_template('item_page.html',username=username,listing=updated_listing,
-                                page_title="Updated Listing") 
+                                page_title="Updated Listing", loggedin = ifLoggedIn) 
 
 #After a user submits a listing to be posted, this route
 #returns to them the result of their successful listing
@@ -369,8 +379,9 @@ def listings():
                 results =  listing.get_listings(conn)
                 print("Here is the session username:")
                 print(session['username'])
+                ifLoggedIn = 'username' in session
                 return render_template("listings.html", listings = results, page_title='All listings', 
-                categories = item_categories, possible_orderings = orderings)
+                categories = item_categories, possible_orderings = orderings, loggedin = ifLoggedIn)
             else:
                 flash('You are not logged in. Please log in or join')
                 return redirect( url_for('login') )
@@ -403,7 +414,9 @@ def update_listing(item_identifier):
     '''
     conn = dbi.connect()
     item = listing.get_listing(conn,item_identifier)
-    return render_template("update.html",listing = item,page_title="Update Listing")
+    ifLoggedIn = 'username' in session
+    return render_template("update.html",listing = item,page_title="Update Listing",  
+                        loggedin = ifLoggedIn)
 
 @app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
 def delete_listing(item_identifier):
@@ -414,7 +427,8 @@ def delete_listing(item_identifier):
     conn = dbi.connect()
     if request.method == 'GET':
         listing_delete = listing.get_listing(conn,item_identifier)
-        return render_template("delete.html", listing = listing_delete)
+        ifLoggedIn = 'username' in session
+        return render_template("delete.html", listing = listing_delete, loggedin = ifLoggedIn )
     elif request.method == 'POST':
         deleted_listing = listing.delete(conn,item_identifier)
         flash('Your listing was successfully deleted.')
@@ -458,10 +472,12 @@ def query():
                 return redirect(url_for('item_page', item_identifier = item_id))
             elif len(results) > 1:
                 flash("Search results: {number_items} item found".format(number_items = len(results)))
+                ifLoggedIn = 'username' in session 
                 return render_template('listings.html', listings = results, 
                                         page_title ='Listings Found',
                                      categories = item_categories, 
-                                     possible_orderings = item_orderings )
+                                     possible_orderings = item_orderings, 
+                                     loggedin = ifLoggedIn )
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
@@ -482,7 +498,9 @@ def favorites():
             results =  listing.get_favorites(conn, 'username')
             # print("Here is the session username:")
             # print(session['username'])
-            return render_template("favorites.html", listings = results, page_title='Favorite items')
+            ifLoggedIn = 'username' in session
+            return render_template("favorites.html", listings = results, page_title='Favorite items', 
+                                    loggedin = ifLoggedIn)
         else:
             flash('You are not logged in. Please log in or join')
             return redirect( url_for('login') )
