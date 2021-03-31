@@ -27,14 +27,17 @@
       <a href="{{url_for('listings')}}">Items for Sale</a>
       <a href="{{url_for('create_listing')}}">List an Item</a>
       <a href="{{url_for('profile')}}">Profile</a>
-      <a href="{{url_for('login')}}"> Log In</a>
+      <!-- surround with if statement using jinja 2  -->
+      <a href="{{url_for('login')}}"> Log In</a> 
+      
       <!--<a href="{{url_for('favorites')}}">Favorites</a>-->
 
     
       <div class="search-container" id = search>
         <form action="/search/">
-          <input type="text" placeholder="Search.." required name="search">
-          <button type="submit"><i class="fa fa-search"></i></button>
+              <input  aria-label="searchbar" type="text" placeholder="Search.." required name="search">
+              <button type="submit"><i class="fa fa-search"> Submit</i></button>
+           
         </form>
 
      
