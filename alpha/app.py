@@ -1,6 +1,7 @@
-#Gem project.
-#March 2021
-#Rebecca, Christine, Natalie, Fatima
+#File Name: app.py
+#Project: Gem
+#Spring 2021
+#RA, CP, NR, FI
 
 #Establish Routes for Listing Form
 from flask import (Flask, render_template, make_response, url_for, request,
@@ -184,26 +185,73 @@ def upload_file():
             return redirect(url_for('uploaded_file',
                                     filename=filename))
 
-#renders the page where one can create a listing
-@app.route("/createlisting/") #methods=['POST','GET']?
+@app.route("/createlisting/",methods=['POST','GET'])
 def create_listing():
     '''
-       Renders the form to create a listing.
+       If a GET request, renders the form to create a listing.
+       If a POST request, retreives information from the form,
+       inserts a new listing, returns the auto-incremented ID of 
+       that listing, and redirects to the item_page/<ID> url.
     '''
-    try:
-        # don't trust the URL; it's only there for decoration
-        if 'username' in session:
-            conn = dbi.connect()
-            results =  listing.get_listings(conn)
-            ifLoggedIn = 'username' in session
-            return render_template("listing_form.html", page_title='Create a listing',update=False, 
-                                    loggedin = ifLoggedIn)
-        else:
-            flash('You are not logged in. Please log in or join')
+    conn = dbi.connect()
+    if request.method == "GET":
+        try:
+            # don't trust the URL; it's only there for decoration
+            if 'username' in session:
+                results =  listing.get_listings(conn)
+                ifLoggedIn = 'username' in session
+                return render_template("listing_form.html", page_title='Create a listing',update=False, 
+                                        loggedin = ifLoggedIn)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('login') )
+        except Exception as err:
+            flash('some kind of error {}'.format(str(err)))
             return redirect( url_for('login') )
-    except Exception as err:
-        flash('some kind of error {}'.format(str(err)))
-        return redirect( url_for('login') )
+    elif request.method == "POST":
+        #If the seller is inserting a listing.
+        if request.form['submit'] == 'insert':
+            #Retrieve values from the "Insert Listing" form.
+            name = request.form['name']
+            categories = (',').join(request.form.getlist('category'))
+            description = request.form['description']
+            condition = request.form['condition']
+            price = request.form['price']
+            if (price == 0): 
+                free = True
+            else:
+                free = False
+            sellmode = (',').join(request.form.getlist('sellmode'))
+            seller_id = session['username']
+            #File Uploads:
+            try:
+                f = request.files['pic']
+                filename = f.filename
+                #ext = user_filename.split('.')[-1]
+                #filename = secure_filename('{}.{}'.format(user_filename,ext))
+                pathname = os.path.join(app.config['UPLOADS'],filename)
+                f.save(pathname)
+            except Exception as err:
+                flash('Upload failed {why}'.format(why=err))
+                return render_template('listing_form.html',src='')
+            
+            image = filename
+            #Should this be outsourced to listing.py?
+            curs = dbi.dict_cursor(conn)
+            curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                on duplicate key update filename = %s''',
+                    [seller_id,filename,filename])
+            conn.commit()
+            #flash('Upload successful')
+            #Insert into DB, retreive itemID.
+            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,
+                                description,condition,price,sellmode,image) 
+            flash("Congrats! Your item is now listed for sale")
+            #Redirect to itemPage URL with the item ID.
+            return redirect(url_for('item_page',item_identifier = item_identifier))
+        #Do I need to through an error here?
+    return redirect('<p>Error</p>')  
+
 
 #listings by order
 @app.route("/listings/price/<order>", methods=['GET'])
@@ -306,61 +354,6 @@ def item_page(item_identifier):
             ifLoggedIn = 'username' in session
             return render_template('item_page.html',username=username,listing=updated_listing,
                                 page_title="Updated Listing", loggedin = ifLoggedIn) 
-
-#After a user submits a listing to be posted, this route
-#returns to them the result of their successful listing
-#and tells them that their listing was posted.
-@app.route("/listing/",methods=['POST','GET'])
-def listing_return():
-    '''
-        Gets information from the "Insert Listing" form.
-        Inserts the new listing, and returns the auto-incremented ID of that listing.
-        Redirects to the itemPage/ID url.
-    '''
-    conn = dbi.connect()
-    if request.method == 'POST':
-        #If seller wishes to insert a listing.
-        if request.form['submit'] == 'insert':
-            #Retrieve values from the "Insert Listing" form.
-            name = request.form['name']
-            categories = (',').join(request.form.getlist('category'))
-            description = request.form['description']
-            condition = request.form['condition']
-            price = request.form['price']
-            try:
-                f = request.files['pic']
-                filename = f.filename
-                #ext = user_filename.split('.')[-1]
-                #filename = secure_filename('{}.{}'.format(user_filename,ext))
-                pathname = os.path.join(app.config['UPLOADS'],filename)
-                f.save(pathname)
-            except Exception as err:
-                flash('Upload failed {why}'.format(why=err))
-                return render_template('listing_form.html',src='')
-            seller_id = session['username']
-            image = filename
-            conn = dbi.connect()
-            curs = dbi.dict_cursor(conn)
-            curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
-                   on duplicate key update filename = %s''',
-                     [seller_id,filename,filename])
-            conn.commit()
-            #flash('Upload successful')
-            if (price == 0): 
-                free = True
-            else:
-                free = False
-            sellmode = (',').join(request.form.getlist('sellmode'))
-            seller_id = session['username']
-            #Insert into DB, retreive itemID.
-            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,
-                                description,condition,price,sellmode,image) 
-            flash("Congrats! Your item is now listed for sale")
-            #Redirect to itemPage URL with the item ID.
-            return redirect(url_for('item_page',item_identifier = item_identifier))
-        #Do I need to through an error here?
-        return redirect('<p>Error</p>')   
-
 #creates the feed for the user to view all listings 
 #of items that are not sold
 @app.route("/listings/", methods=['POST','GET'])
@@ -377,8 +370,6 @@ def listings():
             if 'username' in session:
                 conn = dbi.connect()
                 results =  listing.get_listings(conn)
-                print("Here is the session username:")
-                print(session['username'])
                 ifLoggedIn = 'username' in session
                 return render_template("listings.html", listings = results, page_title='All listings', 
                 categories = item_categories, possible_orderings = orderings, loggedin = ifLoggedIn)
@@ -414,9 +405,20 @@ def update_listing(item_identifier):
     '''
     conn = dbi.connect()
     item = listing.get_listing(conn,item_identifier)
+    all_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                        'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    all_conditions = ('Brand New','Gently Used','Well Loved')
+    all_sellmodes = ('For Sale','For Rent','For Trade')
+    all_statuses = ('Still Available','Awaiting Pickup','Sold')
     ifLoggedIn = 'username' in session
-    return render_template("update.html",listing = item,page_title="Update Listing",  
-                        loggedin = ifLoggedIn)
+    return render_template("update.html",
+                            listing = item,
+                            page_title="Update Listing",  
+                            loggedin = ifLoggedIn,
+                            all_categories=all_categories,
+                            all_conditions=all_conditions,
+                            all_sellmodes=all_sellmodes,
+                            all_statuses=all_statuses)
 
 @app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
 def delete_listing(item_identifier):
