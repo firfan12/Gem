@@ -196,7 +196,7 @@ def create_listing():
         try:
             # don't trust the URL; it's only there for decoration
             if 'username' in session:
-                results =  listing.get_listings(conn)
+                results =  listing.get_listings_by_timestamp(conn, "newest")
                 ifLoggedIn = 'username' in session
                 return render_template("listing_form.html", page_title='Create a listing',
                                         update=False, loggedin = ifLoggedIn)
@@ -298,10 +298,27 @@ def listings_by_category(category):
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Order', categories = item_categories, 
         possible_orderings = item_orderings, loggedin = ifLoggedIn)
-        # price = results['price']
-        # name = results['item_name']
-        # image = results['item_name']
 
+
+#listings by timestamp of when added by createlisting()
+@app.route("/listings/category/<timestamp>",methods=['POST','GET'])
+def listings_by_timestamp(timestamp):
+    '''
+       Renders listings in  a given order based on when item listed for sale/trade/rent.
+    '''
+    conn = dbi.connect()
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low',
+                     'Oldest to Newest', 'Newest to Oldest')
+    if request.method == 'GET': 
+        #Get listings for the given order
+        items = listing.get_listings_by_timestamp(conn, timestamp)
+        username = session['username'] + '@wellesley.edu'
+        ifLoggedIn = 'username' in session
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Order', categories = item_categories, 
+        possible_orderings = item_orderings, loggedin = ifLoggedIn)
 
 
 
@@ -314,7 +331,7 @@ def pic(image):
         '''select filename from uploads where filename = %s''',
         [image])
     if numrows == 0:
-        flash('No picture for {}'.format(filenamep))
+        flash('No picture for {}'.format(filename))
         return redirect(url_for('index'))
     row = curs.fetchone()
     return send_from_directory(app.config['UPLOADS'],row['filename'])
@@ -381,7 +398,7 @@ def listings():
             # don't trust the URL; it's only there for decoration
             if 'username' in session:
                 conn = dbi.connect()
-                results =  listing.get_listings(conn)
+                results =  listing.get_listings_by_timestamp(conn, "newest")
                 ifLoggedIn = 'username' in session
                 return render_template("listings.html", listings = results, page_title='All listings', 
                 categories = item_categories, possible_orderings = orderings, loggedin = ifLoggedIn)
@@ -392,11 +409,11 @@ def listings():
             flash('some kind of error '+str(err))
     elif request.method == 'POST':
         action = request.form['submit-btn']
-        if action == "Choose":
+        if action == "Choose Category":
             selected_category = request.form.get("menu-category")
             flash("Listings in {} Category".format(selected_category))
             return redirect(url_for('listings_by_category', category = selected_category))
-        elif action == "Select":
+        elif action == "Select Order":
             selected_order = request.form['menu-order']
             if selected_order == orderings[0]:
                 order = "cheap" 
@@ -409,16 +426,12 @@ def listings():
             elif selected_order == orderings[2]:
                 order = "oldest"
                 flash("Listings ordered by when added, from oldest to newest")
-                return redirect(url_for('listings_by_price', order = order))
-            elif selected_order == orderings[2]:
+                return redirect(url_for('listings_by_timestamp', timestamp = order))
+            elif selected_order == orderings[3]:
                 order = "newest"
                 flash("Listings ordered by when added, from newest to oldest")
-                #default is that they are organized newest to oldest:
-                return redirect(url_for('listings'))  #?
-            elif selected_order == orderings[2]:
-                order = "oldest"
-                flash("Listings ordered by when added, from oldest to newest")  
-                return redirect(url_for('listings_oldest_first', order = order))
+                return redirect(url_for('listings')) #newest to oldest by default 
+        
                  
 
 
