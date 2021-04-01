@@ -198,8 +198,8 @@ def create_listing():
             if 'username' in session:
                 results =  listing.get_listings(conn)
                 ifLoggedIn = 'username' in session
-                return render_template("listing_form.html", page_title='Create a listing',update=False, 
-                                        loggedin = ifLoggedIn)
+                return render_template("listing_form.html", page_title='Create a listing',
+                                        update=False, loggedin = ifLoggedIn)
             else:
                 flash('You are not logged in. Please log in or join')
                 return redirect( url_for('login') )
@@ -212,6 +212,9 @@ def create_listing():
             #Retrieve values from the "Insert Listing" form.
             name = request.form['name']
             categories = (',').join(request.form.getlist('category'))
+            if not categories: #since empty strings are falsy
+                categories = 'Other'
+
             description = request.form['description']
             condition = request.form['condition']
             price = request.form['price']
@@ -220,6 +223,9 @@ def create_listing():
             else:
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
+            if not sellmode:
+                sellmode = 'For Sale'
+            print("the sellmode is : " + sellmode)
             seller_id = session['username']
             email = seller_id + "@wellesley.edu"
             #File Uploads:
