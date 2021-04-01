@@ -307,7 +307,7 @@ def listings_by_category(category):
 
 
 #listings by timestamp of when added by createlisting()
-@app.route("/listings/category/<timestamp>",methods=['POST','GET'])
+@app.route("/listings/whenadded/<timestamp>",methods=['POST','GET'])
 def listings_by_timestamp(timestamp):
     '''
        Renders listings in  a given order based on when item listed for sale/trade/rent.
