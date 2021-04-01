@@ -13,6 +13,11 @@
         enctype = "multipart/form-data">
         
         <br>
+        <div>
+            <label> Upload a photo</label>
+        
+        <br>
+        <br>
             <input type = "file" aria-label="image-of-listing" name = "pic" required/> 
 
         {% if src != '' %}
@@ -20,6 +25,7 @@
 
         {% endif %}
 
+        </div>
         <div>
             <label>Item Name (model, make, and/or brand):
                 <input class="w3-input w3-padding-16" type="text" 

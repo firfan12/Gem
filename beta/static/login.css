@@ -6,3 +6,12 @@
 .hero-image {
     background-image: url("../static/images/login-background.jpg");
 }
+
+img {
+    opacity: 75%;
+    margin-left: 20%;
+    margin-top: 12%;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+  }

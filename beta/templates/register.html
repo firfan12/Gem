@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block head_stuff %}
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+<link rel='stylesheet' href="{{url_for('static', filename = 'login.css')}}">
 {% endblock %}
 
 {% block main_content %}
 
-<body>
+<div class="hero-image">
+  <img src="../static/images/gem-icon.png" alt="Pink gem icon">
+  <div class="hero-text">
+
+
 
   <h2>Register</h2>
 
@@ -20,6 +25,8 @@
     <p><label>Password again: <input type="password" name="password2" required></label></p>
     <p><button type="submit">Submit</button></p>
 </form>
+</div>
+</div>
 
 {% endblock %}
 
