@@ -16,9 +16,6 @@
             <h4>The item is for:</h4>
             <p class="w3-text-grey">{{listing.sellmode}}</p><br>
 
-            <h4>Seller contact information:</h4>
-            <p class="w3-text-grey">{{listing.seller_id}}</p><br>
-
             <h4>Category</h4>
             <p class="w3-text-grey">{{listing.category}}</p><br>
 
@@ -30,11 +27,15 @@
             <p class="w3-text-grey">{{listing.item_condition}}</p><br>
 
             <h4>Description</h4>
-            <p class="w3-text-grey">{{listing.item_description}}</p>
+            <p class="w3-text-grey">{{listing.item_description}}</p><br>
 
             <h4>Price</h4>
-            <p class="w3-text-grey">{{listing.price}}</p>
+            <p class="w3-text-grey">{{listing.price}}</p><br>
+
+            <h4>Contact information</h4>
+            <p class="w3-text-grey">{{listing.seller_id}}</p>
         </div>
+
 
         <div class="w3-col l6 w3-padding-large">
             <img src= "{{url_for('pic',image=listing.image)}}" 

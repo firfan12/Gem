@@ -9,13 +9,14 @@
 
 {% block main_content %}
   <div class="hero-image">
+    <img src="../static/images/gem-icon.png" alt="Pink gem icon">
     <div class="hero-text">
   
   
       <h1>Log In</h1>
 
       <form id="loginform" action="{{url_for('login')}}" method="post">
-          <p><label>Username: <input type="text" name="username" required ></label></p>
+          <p><label>Email address: <input type="text" name="email" required ></label></p>
           <!-- required pattern="^\w+$" -->
           <p><label>Password: <input type="password" name="password" required></label></p>
           <p><button value = "login" type="submit">Submit</button></p>

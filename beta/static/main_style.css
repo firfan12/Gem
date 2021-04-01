@@ -6,7 +6,8 @@
 body, html {
   height: 100%;
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Times New Roman", Georgia, Serif;
+  text-decoration: none !important;
 }
 
 /*Creates gradient hero image and makes responsive */
@@ -21,12 +22,16 @@ body, html {
 
  /*Styles and positions content in center of page */
 .hero-text {
-  text-align: center;
+  text-align: left;
   position: absolute;
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-bottom: 20px;
   top: 50%;
-  left: 50%;
+  left: 66%;
   transform: translate(-50%, -50%);
   color: black;
+  background-color: rgb(255, 255, 255, 0.5);
 }
 
  /*Styles buttons that are in center of page: */
@@ -36,15 +41,14 @@ body, html {
   display: inline-block;
   padding: 10px 25px;
   color: black;
-  background-color: #ddd;
+  background-color: rgb(255, 255, 255);
   text-align: center;
   cursor: pointer;
-  text-decoration: none;
 }
 
 .hero-text button:hover {
-  background-color: #555;
-  color: rgb(119, 115, 115);
+  background-color: rgb(241, 144, 197);
+  color: rgb(255, 255, 255);
   display: inline-flex;
   padding-right: 2em;
   
@@ -53,6 +57,36 @@ body, html {
 /* Styles page header */
 h1 { 
   font-size: 50px;
+  text-align: left !important;
+}
+
+a { text-decoration: none; }
+
+img {
+  opacity: 75%;
+  margin-left: 20%;
+  margin-top: 12%;
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.responsive {
+  padding: 0 6px;
+  float: left;
+  width: 24.99999%;
+}
+
+@media only screen and (max-width: 700px) {
+  .responsive {
+  width: 49.99999%;
+  margin: 6px 0;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .responsive {
+    width: 100%;
+  }
 }
 
 

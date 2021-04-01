@@ -13,13 +13,19 @@
         enctype = "multipart/form-data">
         
         <br>
-            <input type = "file" name = "pic" required/> 
+        <div>
+            <label> Upload a photo</label>
+        
+        <br>
+        <br>
+            <input type = "file" aria-label="image-of-listing" name = "pic" required/> 
 
         {% if src != '' %}
-        <p> <img src="{{src}}"></p>
-        <!-- alt = "upload item image here" -->
+        <p> <img src="{{src}}" alt = "upload item image"></p>
+
         {% endif %}
 
+        </div>
         <div>
             <label>Item Name (model, make, and/or brand):
                 <input class="w3-input w3-padding-16" type="text" 
@@ -85,8 +91,9 @@
                 </label>
             </div>
             <div>
-                <label> Other: 
-                    <input  type=text name="category10" placeholder="Explanation">
+                <label> 
+                    <input type=checkbox name="category" value="Other">
+                    Other
                 </label>
             </div>
         </div>   
