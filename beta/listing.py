@@ -80,23 +80,6 @@ def delete(conn,item_identifier):
     return deleted
 
 
-#Retrieve all listings that are not marked as Sold.
-def get_listings(conn): 
-    '''
-       Takes an database connection. 
-       Retrieves all of the listings in the item table that 
-       are marked as "Still Available". 
-       Returns a list of dictionaries that contain all of the 
-       information for those items.
-    '''
-    curs = dbi.dict_cursor(conn)
-    sql  = '''select  * from item 
-            where status <> 'Sold'
-            order by item_id desc'''
-    curs.execute(sql)
-    results = curs.fetchall()
-    return results
-
 
 #Retrieve items that current user favorited
 def get_favorites(conn, username): 
@@ -138,20 +121,14 @@ def get_listings_by_price(conn, order):
        information for those items.
     '''
     if order == 'cheap':
-        # flash("listings organized from cheapest to most expensive")
         sql = '''select  * from item where status <> 'Sold' order by price asc'''
     else:
-        # flash("listings organized from  most expensive to cheapest")
         sql = '''select  * from item where status <> 'Sold' order by price desc'''
     curs = dbi.dict_cursor(conn)
     curs.execute(sql)
     results = curs.fetchall()
     return results
     
-
-
-
-   
 
 #Renders a page will all listings stated as "Still Available" for certain category
 def get_listings_by_category(conn, category): 
@@ -169,6 +146,27 @@ def get_listings_by_category(conn, category):
     curs.execute(sql, val)
     results = curs.fetchall()
     return results
+
+
+#Renders a page will all listings stated as "Still Available" by their timestamp
+#i.e. either newest to oldest, or newest to oldest
+def get_listings_by_timestamp(conn, timestamp): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" by timestamp
+       Returns a list of dictionaries that contain all of the 
+       information for those items, ordered by when they were added to the db.
+    '''
+    curs = dbi.dict_cursor(conn)
+    if timestamp == "newest":
+        sql  = '''select  * from item where status <> 'Sold' order by timestamp desc'''
+    elif timestamp == "oldest":
+        sql = '''select  * from item where status <> 'Sold' order by timestamp asc'''
+    curs.execute(sql)
+    results = curs.fetchall()
+    return results
+
 
 
     
