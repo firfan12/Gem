@@ -138,10 +138,10 @@ def get_listings_by_price(conn, order):
        information for those items.
     '''
     if order == 'cheap':
-        flash("listings organized from cheapest to most expensive")
+        # flash("listings organized from cheapest to most expensive")
         sql = '''select  * from item where status <> 'Sold' order by price asc'''
     else:
-        flash("listings organized from  most expensive to cheapest")
+        # flash("listings organized from  most expensive to cheapest")
         sql = '''select  * from item where status <> 'Sold' order by price desc'''
     curs = dbi.dict_cursor(conn)
     curs.execute(sql)
@@ -162,7 +162,7 @@ def get_listings_by_category(conn, category):
        Returns a list of dictionaries that contain all of the 
        information for those items.
     '''
-    flash("listings in the category: " + str(category))
+    # flash("listings in the category: " + str(category))
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from item where status <> 'Sold' and category like %s ''' 
     val = ["%" + category + "%" ]

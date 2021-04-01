@@ -265,7 +265,8 @@ def listings_by_price(order):
     '''Renders listings in a certain category, or'''
     item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
                 'School Supplies','Tech','Furniture','Textbooks','Food','Other')
-    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    item_orderings = ('Price: Low to High', 'Price: High to Low', 
+                     'Oldest to Newest', 'Newest to Oldest')
     if request.method == 'GET': 
         conn = dbi.connect()
         #Get item listings for the given category
@@ -287,7 +288,8 @@ def listings_by_category(category):
     conn = dbi.connect()
     item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
                 'School Supplies','Tech','Furniture','Textbooks','Food','Other')
-    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    item_orderings = ('Price: Low to High', 'Price: High to Low',
+                     'Oldest to Newest', 'Newest to Oldest')
     if request.method == 'GET': 
         #Get listings for the given order
         items = listing.get_listings_by_category(conn, category)
@@ -299,6 +301,9 @@ def listings_by_category(category):
         # price = results['price']
         # name = results['item_name']
         # image = results['item_name']
+
+
+
 
     
 @app.route('/pic/<image>')
@@ -369,7 +374,8 @@ def listings():
     '''
     item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
                 'School Supplies','Tech','Furniture','Textbooks','Food','Other')
-    orderings = ('Price: Low to High', 'Price: High to Low')
+    orderings = ('Price: Low to High', 'Price: High to Low', 
+                'Oldest to Newest', 'Newest to Oldest')
     if request.method == 'GET':
         try:
             # don't trust the URL; it's only there for decoration
@@ -388,14 +394,32 @@ def listings():
         action = request.form['submit-btn']
         if action == "Choose":
             selected_category = request.form.get("menu-category")
+            flash("Listings in {} Category".format(selected_category))
             return redirect(url_for('listings_by_category', category = selected_category))
         elif action == "Select":
             selected_order = request.form['menu-order']
             if selected_order == orderings[0]:
-                order = "cheap"     
+                order = "cheap" 
+                flash("Listings ordered by price, from low to high")
+                return redirect(url_for('listings_by_price', order = order))   
             elif selected_order == orderings[1]:
                 order = "expensive"
-            return redirect(url_for('listings_by_price', order = order))
+                flash("Listings ordered by price, from high to low") 
+                return redirect(url_for('listings_by_price', order = order))
+            elif selected_order == orderings[2]:
+                order = "oldest"
+                flash("Listings ordered by when added, from oldest to newest")
+                return redirect(url_for('listings_by_price', order = order))
+            elif selected_order == orderings[2]:
+                order = "newest"
+                flash("Listings ordered by when added, from newest to oldest")
+                #default is that they are organized newest to oldest:
+                return redirect(url_for('listings'))  #?
+            elif selected_order == orderings[2]:
+                order = "oldest"
+                flash("Listings ordered by when added, from oldest to newest")  
+                return redirect(url_for('listings_oldest_first', order = order))
+                 
 
 
 
@@ -451,7 +475,8 @@ def query():
     '''
     item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
                 'School Supplies','Tech','Furniture','Textbooks','Food','Other')
-    item_orderings = ('Price: Low to High', 'Price: High to Low')
+    item_orderings = ('Price: Low to High', 'Price: High to Low', 
+                     'Oldest to Newest', 'Newest to Oldest')
     try:
         if 'username' in session:
             username = session['username']
