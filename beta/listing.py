@@ -29,7 +29,7 @@ def insert_listing(conn,name,seller_id,category,free,description,condition,price
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
     #For now, image not implemented. Using hardcoded image for the draft.
-
+    
     curs.execute('''
         insert into item(item_name,seller_id,category,free,status,item_condition,item_description,
                         price,sellmode,image)

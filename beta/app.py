@@ -214,6 +214,9 @@ def create_listing():
             #Retrieve values from the "Insert Listing" form.
             name = request.form['name']
             categories = (',').join(request.form.getlist('category'))
+            if not categories: #since empty strings are falsy
+                categories = 'Other'
+
             description = request.form['description']
             condition = request.form['condition']
             price = request.form['price']
@@ -222,6 +225,9 @@ def create_listing():
             else:
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
+            if not sellmode:
+                sellmode = 'For Sale'
+            print("the sellmode is : " + sellmode)
             seller_id = session['username']
             #File Uploads:
             try:

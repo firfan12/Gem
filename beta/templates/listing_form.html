@@ -13,11 +13,11 @@
         enctype = "multipart/form-data">
         
         <br>
-            <input type = "file" name = "pic" required/> 
+            <input type = "file" aria-label="image-of-listing" name = "pic" required/> 
 
         {% if src != '' %}
-        <p> <img src="{{src}}"></p>
-        <!-- alt = "upload item image here" -->
+        <p> <img src="{{src}}" alt = "upload item image"></p>
+
         {% endif %}
 
         <div>
