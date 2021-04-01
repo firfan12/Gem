@@ -19,9 +19,6 @@ import logins
 import sys, os, random
 import imghdr
 
-
-
-
 app.secret_key = 'your secret here'
 # replace that with a random key
 app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
@@ -92,14 +89,14 @@ def login():
         return render_template('login.html', page_title='Log In To Gem', loggedin = ifLoggedIn)   
     if request.method == 'POST':
         try:
-            username = request.form['username']
+            email = request.form['email']
             passwd = request.form['password']
             conn = dbi.connect()
             curs = dbi.dict_cursor(conn)
             curs.execute('''SELECT hashed
                         FROM userpass
                         WHERE user = %s''',
-                        [username])
+                        [email])
             row = curs.fetchone()
             if row is None:
                 # Same response as wrong password,
@@ -110,6 +107,7 @@ def login():
             hashed2 = bcrypt.hashpw(passwd.encode('utf-8'),
                                     hashed.encode('utf-8'))
             hashed2_str = hashed2.decode('utf-8')
+            username = email.replace("@wellesley.edu","")
             if hashed2_str == hashed:
                 flash('Successfully logged in as '+username)
                 session['username'] = username
@@ -149,7 +147,7 @@ def profile():
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
-            username = session['username']
+            username = session['username'] + '@wellesley.edu'
             session['visits'] = 1+int(session['visits'])
             my_listings = listing.get_my_listings(conn,username)
             ifLoggedIn = 'username' in session 
@@ -223,6 +221,7 @@ def create_listing():
                 free = False
             sellmode = (',').join(request.form.getlist('sellmode'))
             seller_id = session['username']
+            email = seller_id + "@wellesley.edu"
             #File Uploads:
             try:
                 f = request.files['pic']
@@ -240,11 +239,12 @@ def create_listing():
             curs = dbi.dict_cursor(conn)
             curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
                 on duplicate key update filename = %s''',
-                    [seller_id,filename,filename])
+                    [email,filename,filename])
             conn.commit()
             #flash('Upload successful')
             #Insert into DB, retreive itemID.
-            item_identifier = listing.insert_listing(conn,name,seller_id,categories,free,
+            insert_sellerID = seller_id + '@wellesley.edu'
+            item_identifier = listing.insert_listing(conn,name,insert_sellerID,categories,free,
                                 description,condition,price,sellmode,image) 
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
@@ -264,7 +264,7 @@ def listings_by_price(order):
         conn = dbi.connect()
         #Get item listings for the given category
         items = listing.get_listings_by_price(conn, order)
-        username = session['username']
+        username = session['username'] + '@wellesley.edu'
         ifLoggedIn = 'username' in session
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Price', categories = item_categories, 
@@ -285,7 +285,7 @@ def listings_by_category(category):
     if request.method == 'GET': 
         #Get listings for the given order
         items = listing.get_listings_by_category(conn, category)
-        username = session['username']
+        username = session['username'] + '@wellesley.edu'
         ifLoggedIn = 'username' in session
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Order', categories = item_categories, 
@@ -326,10 +326,10 @@ def item_page(item_identifier):
     if request.method == 'GET': 
         #Get the database dictionary of the item given its ID.
         item = listing.get_listing(conn, item_identifier)
-        username = session['username']
+        username = session['username'] + '@wellesley.edu'
         ifLoggedIn = 'username' in session
         return render_template("item_page.html",username=username,listing = item, 
-                                page_title='One listing', loggedin = ifLoggedIn)
+                                page_title=item['item_name'], loggedin = ifLoggedIn)
     #If the request is POST.
     if request.method == "POST":
         #If the seller wishes to update their listing.
@@ -348,12 +348,12 @@ def item_page(item_identifier):
             #Update the listing.
             updated_listing = listing.update(conn,item_identifier,status,name,categories,free,
                                 description,condition,price,sellmode)
-            username = session['username']
+            username = session['username'] + '@wellesley.edu'
             flash('Your item has been updated!')
             #Re-render the item page with the correct values.
             ifLoggedIn = 'username' in session
             return render_template('item_page.html',username=username,listing=updated_listing,
-                                page_title="Updated Listing", loggedin = ifLoggedIn) 
+                                page_title=name, loggedin = ifLoggedIn) 
 #creates the feed for the user to view all listings 
 #of items that are not sold
 @app.route("/listings/", methods=['POST','GET'])
@@ -448,7 +448,7 @@ def query():
     item_orderings = ('Price: Low to High', 'Price: High to Low')
     try:
         if 'username' in session:
-            username = session['username']
+            username = session['username'] + '@wellesley.edu'
             session['visits'] = 1+int(session['visits'])
     
             conn = dbi.connect()
