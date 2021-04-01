@@ -200,8 +200,8 @@ def create_listing():
             if 'username' in session:
                 results =  listing.get_listings(conn)
                 ifLoggedIn = 'username' in session
-                return render_template("listing_form.html", page_title='Create a listing',update=False, 
-                                        loggedin = ifLoggedIn)
+                return render_template("listing_form.html", page_title='Create a listing',
+                                        update=False, loggedin = ifLoggedIn)
             else:
                 flash('You are not logged in. Please log in or join')
                 return redirect( url_for('login') )
