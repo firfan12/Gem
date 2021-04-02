@@ -110,15 +110,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-
-/* button will not center. does not work, so commenting out for now. */
-/* button {
-  display: block;
-  margin: auto;
-  justify-content: center;
-}  */
-
-
 /* added when styling the top search button since it is the css that goes along with it. 
 need to look thru and remove some stuff later */
 * {box-sizing: border-box;}
