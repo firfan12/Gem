@@ -337,7 +337,7 @@ def pic(image):
         '''select filename from uploads where filename = %s''',
         [image])
     if numrows == 0:
-        flash('No picture for {}'.format(filename))
+        flash('No picture for {}'.format(image))
         return redirect(url_for('index'))
     row = curs.fetchone()
     return send_from_directory(app.config['UPLOADS'],row['filename'])
