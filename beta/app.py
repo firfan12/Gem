@@ -272,6 +272,7 @@ def listings_by_price(order):
         #Get item listings for the given category
         items = listing.get_listings_by_price(conn, order)
         username = session['username'] + '@wellesley.edu'
+        print(username)
         ifLoggedIn = 'username' in session
         return render_template("listings.html",username=username,
         listings = items, page_title='Listings by Price', categories = item_categories, 
