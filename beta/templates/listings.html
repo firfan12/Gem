@@ -13,7 +13,7 @@
     <div class = "menu-form"> 
         <form method=POST action="{{url_for('listings')}}" >
           <label for="menu-category">Search by category:</label>
-          <select required name="menu-category" placeholder = "Choose One">
+          <select name="menu-category" id="menu-category">
               <!--Fills out the drop down menu with the item categories-->
               {% for category in categories %}
               <option value="{{category}}">{{category}}</option>   
@@ -24,7 +24,7 @@
 
         <!-- the menu for ordering by price-->     
         <label for="menu-order">Order by:</label>
-        <select name="menu-order">
+        <select name="menu-order" id="menu-order">
             <!--Fills out the drop down menu with incomplete movies-->
             {% for order in possible_orderings %}
             <option value="{{order}}">{{order}}</option>   
