@@ -271,14 +271,20 @@ def listings_by_price(order):
         conn = dbi.connect()
         #Get item listings for the given category
         items = listing.get_listings_by_price(conn, order)
-        username = session['username'] + '@wellesley.edu'
-        print(username)
-        ifLoggedIn = 'username' in session
-        return render_template("listings.html",username=username,
-        listings = items, page_title='Listings by Price', categories = item_categories, 
-        possible_orderings = item_orderings, loggedin = ifLoggedIn)
-        
-
+        try:
+            if 'username' in session:
+                username = session['username'] + '@wellesley.edu'
+                print(username)
+                ifLoggedIn = 'username' in session
+                return render_template("listings.html",username=username,
+                listings = items, page_title='Listings by Price', categories = item_categories, 
+                possible_orderings = item_orderings, loggedin = ifLoggedIn)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('listings') )
+        except Exception as err:
+            flash('some kind of error {}'.format(str(err)))
+            return redirect( url_for('listings') )
 
 #listings by category
 @app.route("/listings/category/<category>",methods=['POST','GET'])

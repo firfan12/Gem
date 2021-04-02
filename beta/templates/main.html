@@ -21,15 +21,8 @@
       Who knows... you might make a little
       bit of cash or find a new pre-loved Gem!</p>
 
-    <!--button on left in center of page -->
-    <a href = "{{ url_for('listings') }}">
-      <button name="submit_button" value="buy">Explore items for sale</button>
-    </a>
-
-    <!--button on right in center of page -->
-    <a href = "{{ url_for('create_listing') }}">
-      <button name="submit_button" value="sell">Sell an Item</button>
-    </a>
+    <a href = "{{ url_for('listings') }}">Explore items for sale</a>
+    <a href = "{{ url_for('create_listing') }}">Sell an item</a>
   </div>
 </div>
 {% endblock %}
