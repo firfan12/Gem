@@ -22,7 +22,11 @@
             <input type = "file" aria-label="image-of-listing" name = "pic" required/> 
 
         {% if src != '' %}
-        <p> <img src="{{src}}"></p>
+        <p> 
+            <label> Upload an image: 
+                <img src="{{src}}">
+            </label>
+        </p>
         {% endif %}
 
         </div>
