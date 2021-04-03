@@ -5,18 +5,7 @@
 import cs304dbi as dbi
 import os 
 
-#For the time being, there is one seller and her ID is:
-#sellerID = "firfan"
-#insert into person(name, email, password) values('Rebecca', 'rarango@wellesley.edu', 'sdfd');
-#inserting manually in terminal
 
-
-#Retreives the id of the last inserted item.
-# def getLastInsertID(conn):
-#     curs = dbi.dict_cursor(conn)
-#     curs.execute('''select last_insert_id()''')
-#     itemID = curs.fetchone()
-#     return itemID['last_insert_id()']
 def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode,image):
     '''
        Takes a database connection, item name (str), item categories (str), 
@@ -28,7 +17,6 @@ def insert_listing(conn,name,seller_id,category,free,description,condition,price
     '''
     status = 'Still Available'
     curs = dbi.dict_cursor(conn)
-    #For now, image not implemented. Using hardcoded image for the draft.
     
     curs.execute('''
         insert into item(item_name,seller_id,category,free,status,item_condition,item_description,
@@ -139,7 +127,6 @@ def get_listings_by_category(conn, category):
        Returns a list of dictionaries that contain all of the 
        information for those items.
     '''
-    # flash("listings in the category: " + str(category))
     curs = dbi.dict_cursor(conn)
     sql  = '''select  * from item where status <> 'Sold' and category like %s ''' 
     val = ["%" + category + "%" ]
@@ -218,17 +205,7 @@ if __name__ == '__main__':
     dbi.cache_cnf()  
     dbi.use('gem_db')
     conn = dbi.connect()
-    #result = getListing(conn,5)
-    #result = get_listings(conn)
-    #result = insert_listing(conn,"shirt","Clothing",False,"red","Brand New","10.50","For Sale")
-    #result = insertListing(conn,"shirt","red")
-    #result = getListings(conn)
-    #result = getListing(conn,1)
-    #result = update(conn,1,"Awaiting Pickup","Reformation Dress 3","Clothing",False,
-    # "Pink",'Brand New',12.12,'For Sale,For Rent')
-    #result = delete(conn,34)
-    #result = get_my_listings(conn,'rarango')
-    print(result) 
+  
 
 
 

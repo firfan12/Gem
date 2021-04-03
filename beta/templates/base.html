@@ -1,3 +1,6 @@
+<!--This is the base page that all other pages are styled from.
+Contains the base Jinja template structure-->
+
 <!doctype html>
 <html lang='en'>
 
@@ -36,22 +39,15 @@
       {% if not loggedin %}
         <a href="{{url_for('login')}}"> Log In</a> 
       {% endif %}
-      
-      
-      <!--<a href="{{url_for('favorites')}}">Favorites</a>-->
-
-    
+   
       <div class="search-container" id = search>
         <form action="{{url_for('query')}}">
           <button type="submit"><i class="fa fa-search"> Submit</i></button>
-          <input  aria-label="searchbar" type="text" placeholder="Search.." required name="search">
-              
-           
+          <input  aria-label="searchbar" type="text" placeholder="Search.." required name="search">        
         </form>
       </div>
     </nav>
-    
-
+   
     
     <!-- will display flashed messages -->
     {% with messages = get_flashed_messages() %}
@@ -74,5 +70,4 @@
     {% block end_scripts %}
     {% endblock %}
   </body>
-
 </html>
