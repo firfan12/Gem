@@ -42,7 +42,7 @@
 
     
       <div class="search-container" id = search>
-        <form action="/search/">
+        <form action="{{url_for('query')}}">
           <button type="submit"><i class="fa fa-search"> Submit</i></button>
           <input  aria-label="searchbar" type="text" placeholder="Search.." required name="search">
               
@@ -73,10 +73,6 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     {% block end_scripts %}
     {% endblock %}
-
-
-
-
   </body>
 
 </html>
