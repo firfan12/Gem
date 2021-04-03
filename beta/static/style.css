@@ -60,10 +60,51 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* styles the flashed messages */
+#messages{ 
+  text-align: center;
+  padding: 20px;
+  font-family: "Times New Roman", Georgia, Serif;
+  font-size:12px;
+}
+
+
+/* makes navbar white rather than the default pink */
+.topnav {
+  overflow: hidden;
+  background-color: #e9e9e9;
+}
+
+/* makes the active button black rather than the default pink */
+.topnav a.active {
+  background-color: black;
+  color: white;
+  text-decoration: none;
+}
+
+/* styles the search bar button */
+.topnav .search-container button {
+  float: right;
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-right: 16px;
+  background: #ddd;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  font-family: "Times New Roman", Georgia, Serif;
+}
 
 /* makes the nav bar more responsive to changes in  screen size */
 @media screen and (max-width: 600px) {
-  .topnav a, .topnav input[type=text] {
+  .topnav input[type=text] {
+    border: 1px solid #ccc;  
+  }
+
+  .topnav .search-container {
+    float: none;
+  }
+  .topnav a, .topnav input[type=text], .topnav .search-container button {
     float: none;
     display: block;
     text-align: left;
@@ -71,10 +112,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     padding: 14px;
   }
-  
-  .topnav input[type=text] {
-    border: 1px solid #ccc;  
-  }
+ 
 }
 
 
@@ -94,98 +132,5 @@ h1, h2, h3, h4, h5, h6 {
 @media only screen and (max-width: 500px) {
   .responsive {
     width: 100%;
-  }
-}
-
-
-
-/* styles the flashed messages */
-#messages{ 
-  text-align: center;
-  padding: 20px;
-  font-family: "Times New Roman", Georgia, Serif;
-  font-size:12px;
-}
-
-
-/* added when styling the top search button since it is the css that goes along with it. 
-need to look thru and remove some stuff later */
-* {box-sizing: border-box;}
-
-body {
-  margin: 0;
-  font-family: "Times New Roman", Georgia, Serif;
-  text-decoration: none;
-}
-
-.topnav {
-  overflow: hidden;
-  background-color: #e9e9e9;
-}
-
-.topnav a {
-  float: left;
-  display: block;
-  color: black;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
-  background-color: #e9e9e9;
-}
-
-.topnav a:hover {
-  background-color: #ddd;
-  color: black;
-  text-decoration: none;
-}
-
-.topnav a.active {
-  background-color: black;
-  color: white;
-  text-decoration: none;
-}
-
-.topnav .search-container {
-  float: right;
-}
-
-.topnav input[type=text] {
-  padding: 6px;
-  margin-top: 8px;
-  font-size: 17px;
-  border: none;
-}
-
-.topnav .search-container button {
-  float: right;
-  padding: 6px 10px;
-  margin-top: 8px;
-  margin-right: 16px;
-  background: #ddd;
-  font-size: 17px;
-  border: none;
-  cursor: pointer;
-  font-family: "Times New Roman", Georgia, Serif;
-}
-
-.topnav .search-container button:hover {
-  background: #ccc;
-}
-
-@media screen and (max-width: 600px) {
-  .topnav .search-container {
-    float: none;
-  }
-  .topnav a, .topnav input[type=text], .topnav .search-container button {
-    float: none;
-    display: block;
-    text-align: left;
-    width: 100%;
-    margin: 0;
-    padding: 14px;
-  }
-  .topnav input[type=text] {
-    border: 1px solid #ccc;  
   }
 }

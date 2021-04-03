@@ -266,6 +266,7 @@ def listings_by_price(order):
         try:
             if 'username' in session:
                 username = session['username'] + '@wellesley.edu'
+                print(username)
                 ifLoggedIn = 'username' in session
                 return render_template("listings.html",username=username,
                 listings = items, page_title='Listings by Price', categories = item_categories, 
