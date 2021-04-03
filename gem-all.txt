@@ -1,0 +1,1791 @@
+#File Name: app.py
+#Project: Gem
+#Spring 2021
+#RA, CP, NR, FI
+
+#Establish Routes for Listing Form
+from flask import (Flask, render_template, make_response, url_for, request,
+                   redirect, flash, session, send_from_directory, jsonify, Response)
+from werkzeug.utils import secure_filename
+app = Flask(__name__)
+
+
+import cs304dbi as dbi
+import listing  #imports helper methods
+import random
+import bcrypt
+import sys, os, random
+import imghdr
+
+app.secret_key = 'your secret here'
+# replace that with a random key
+app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
+                                          'abcdefghijklmnopqrstuvxyz' +
+                                          '0123456789'))
+                           for i in range(20) ])
+
+# This gets us better error messages for certain common request errors
+app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 1*1024*1024 # 1 MB
+
+#routes users to the Gem home page
+@app.route('/')
+def index():
+    '''
+       Renders the home page.
+    '''
+    ifLoggedIn = 'username' in session
+    return render_template('main.html',page_title='Gem Home Page', loggedin = ifLoggedIn )
+
+@app.route('/join/', methods=["POST", "GET"])
+def join():
+    if request.method == 'GET':
+        ifLoggedIn = 'username' in session
+        return render_template('register.html', page_title='Join Gem', loggedin = ifLoggedIn)
+    
+    if request.method == 'POST':
+        try:
+            username = request.form['username']
+            passwd1 = request.form['password1']
+            passwd2 = request.form['password2']
+            email = request.form['email']
+            if passwd1 != passwd2:
+                flash('Passwords do not match. Please try again.')
+                return redirect( url_for('join'))
+            hashed = bcrypt.hashpw(passwd1.encode('utf-8'),
+                                bcrypt.gensalt())
+            hashed_str = hashed.decode('utf-8')
+            conn = dbi.connect()
+            curs = dbi.cursor(conn)
+            try:
+                curs.execute('''INSERT INTO person(name,email)
+                                VALUES(%s,%s)''',
+                            [username, email])
+                curs.execute('''INSERT INTO userpass(user,hashed)
+                                VALUES(%s,%s)''',
+                            [email, hashed_str])
+                conn.commit()
+            except Exception as err:
+                flash('That username is taken. Please pick a different username{}'.format(str(err)) )
+                return redirect(url_for('join'))
+            curs.execute('select last_insert_id()')
+            row = curs.fetchone()
+            session['username'] = username
+            session['logged_in'] = True
+            session['visits'] = 1
+            return redirect(url_for('profile'))
+        except Exception as err:
+            flash('form submission error '+str(err))
+            return redirect( url_for('index') )
+
+@app.route('/login/', methods=["POST", "GET"])
+def login():
+    if request.method == 'GET':
+        ifLoggedIn = 'username' in session 
+        return render_template('login.html', page_title='Log In To Gem', loggedin = ifLoggedIn)   
+    if request.method == 'POST':
+        try:
+            email = request.form['email']
+            passwd = request.form['password']
+            conn = dbi.connect()
+            curs = dbi.dict_cursor(conn)
+            curs.execute('''SELECT hashed
+                        FROM userpass
+                        WHERE user = %s''',
+                        [email])
+            row = curs.fetchone()
+            if row is None:
+                # Same response as wrong password,
+                # so no information about what went wrong
+                flash('Login incorrect. Try again or join')
+                return redirect( url_for('login'))
+            hashed = row['hashed']
+            hashed2 = bcrypt.hashpw(passwd.encode('utf-8'),
+                                    hashed.encode('utf-8'))
+            hashed2_str = hashed2.decode('utf-8')
+            username = email.replace("@wellesley.edu","")
+            if hashed2_str == hashed:
+                flash('Successfully logged in as '+username)
+                session['username'] = username
+                session['logged_in'] = True
+                session['visits'] = 1
+                return redirect(url_for('index'))
+            else:
+                flash('Login incorrect. Try again or join')
+                return redirect( url_for('login'))
+        except Exception as err:
+            flash('form submission error '+str(err))
+            return redirect( url_for('index') )
+
+@app.route('/logout/')
+def logout():
+    try:
+        if 'username' in session:
+            username = session['username']
+            session.pop('username')
+            session.pop('logged_in')
+            flash('You are logged out')
+            return redirect(url_for('index'))
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('index') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('index') )
+
+@app.route('/profile/')
+def profile():
+    '''
+       Renders the template for the profile.
+    '''
+    conn = dbi.connect()
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            username = session['username'] + '@wellesley.edu'
+            session['visits'] = 1+int(session['visits'])
+            my_listings = listing.get_my_listings(conn,username)
+            ifLoggedIn = 'username' in session 
+            return render_template('profile.html',
+                                   page_title='Gem: Welcome {}'.format(username),
+                                   name=username,
+                                   visits=session['visits'],
+                                   listings=my_listings, loggedin = ifLoggedIn)
+
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login'))
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
+
+@app.route("/createlisting/",methods=['POST','GET'])
+def create_listing():
+    '''
+       If a GET request, renders the form to create a listing.
+       If a POST request, retreives information from the form,
+       inserts a new listing, returns the auto-incremented ID of 
+       that listing, and redirects to the item_page/<ID> url.
+    '''
+    conn = dbi.connect()
+    if request.method == "GET":
+        try:
+            # don't trust the URL; it's only there for decoration
+            if 'username' in session:
+                results =  listing.get_listings_by_timestamp(conn, "newest")
+                ifLoggedIn = 'username' in session
+                return render_template("listing_form.html", page_title='Create a listing',
+                                        update=False, loggedin = ifLoggedIn)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('login') )
+        except Exception as err:
+            flash('some kind of error {}'.format(str(err)))
+            return redirect( url_for('login') )
+    elif request.method == "POST":
+        #If the seller is inserting a listing.
+        if request.form['submit'] == 'insert':
+            #Retrieve values from the "Insert Listing" form.
+            name = request.form['name']
+            categories = (',').join(request.form.getlist('category'))
+            if not categories: #since empty strings are falsy
+                categories = 'Other'
+            description = request.form['description']
+            condition = request.form['condition']
+            price = request.form['price']
+            if (price == 0): 
+                free = True
+            else:
+                free = False
+            sellmode = (',').join(request.form.getlist('sellmode'))
+            if not sellmode:
+                sellmode = 'For Sale'
+            seller_id = session['username']
+            email = seller_id + "@wellesley.edu"
+            #File Uploads:
+            try:
+                f = request.files['pic']
+                filename = f.filename
+                pathname = os.path.join(app.config['UPLOADS'],filename)
+                f.save(pathname)
+            except Exception as err:
+                flash('Upload failed {why}'.format(why=err))
+                return render_template('listing_form.html',src='')
+            
+            image = filename
+            
+            curs = dbi.dict_cursor(conn)
+            curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                on duplicate key update filename = %s''',
+                    [email,filename,filename])
+            conn.commit()
+            
+            #Insert into DB, retreive itemID.
+            insert_sellerID = seller_id + '@wellesley.edu'
+            item_identifier = listing.insert_listing(conn,name,insert_sellerID,categories,free,
+                                description,condition,price,sellmode,image) 
+            flash("Congrats! Your item is now listed for sale")
+            #Redirect to itemPage URL with the item ID.
+            return redirect(url_for('item_page',item_identifier = item_identifier))
+       
+    return redirect('<p>Error</p>')  
+
+
+#listings by order
+@app.route("/listings/price/<order>", methods=['GET'])
+def listings_by_price(order):
+    '''Renders listings in a certain category, or'''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low', 
+                     'Oldest to Newest', 'Newest to Oldest')
+    if request.method == 'GET': 
+        conn = dbi.connect()
+        #Get item listings for the given category
+        items = listing.get_listings_by_price(conn, order)
+        try:
+            if 'username' in session:
+                username = session['username'] + '@wellesley.edu'
+                print(username)
+                ifLoggedIn = 'username' in session
+                return render_template("listings.html",username=username,
+                listings = items, page_title='Listings by Price', categories = item_categories, 
+                possible_orderings = item_orderings, loggedin = ifLoggedIn)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('listings') )
+        except Exception as err:
+            flash('some kind of error {}'.format(str(err)))
+            return redirect( url_for('listings') )
+
+#listings by category
+@app.route("/listings/category/<category>",methods=['POST','GET'])
+def listings_by_category(category):
+    '''
+       Renders listings in  a given order by price. 
+    '''
+    conn = dbi.connect()
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low',
+                     'Oldest to Newest', 'Newest to Oldest')
+    if request.method == 'GET': 
+        #Get listings for the given order
+        items = listing.get_listings_by_category(conn, category)
+        username = session['username'] + '@wellesley.edu'
+        ifLoggedIn = 'username' in session
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Order', categories = item_categories, 
+        possible_orderings = item_orderings, loggedin = ifLoggedIn)
+
+
+#listings by timestamp of when added by createlisting()
+@app.route("/listings/whenadded/<timestamp>",methods=['POST','GET'])
+def listings_by_timestamp(timestamp):
+    '''
+       Renders listings in  a given order based on when item listed for sale/trade/rent.
+    '''
+    conn = dbi.connect()
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low',
+                     'Oldest to Newest', 'Newest to Oldest')
+    if request.method == 'GET': 
+        #Get listings for the given order
+        items = listing.get_listings_by_timestamp(conn, timestamp)
+        username = session['username'] + '@wellesley.edu'
+        ifLoggedIn = 'username' in session
+        return render_template("listings.html",username=username,
+        listings = items, page_title='Listings by Order', categories = item_categories, 
+        possible_orderings = item_orderings, loggedin = ifLoggedIn)
+
+    
+@app.route('/pic/<image>')
+def pic(image):
+    conn = dbi.connect()
+    curs = dbi.dict_cursor(conn)
+    numrows = curs.execute(
+        '''select filename from uploads where filename = %s''',
+        [image])
+    if numrows == 0:
+        flash('No picture for {}'.format(image))
+        return redirect(url_for('index'))
+    row = curs.fetchone()
+    return send_from_directory(app.config['UPLOADS'],row['filename'])
+
+    
+
+#renders the page for an individual item listing
+#Checks if the viewer is the buyer or seller.
+#If the viewer is a seller, then display the update and delete buttons.
+#If the viewer is a buyer, then 
+@app.route("/item/<item_identifier>",methods=['POST','GET'])
+def item_page(item_identifier):
+    '''
+       Renders a page for a single item.
+       If the view is a seller, displays an update and delete button.
+       If the viewer is a buyer, then displays a "contact" button to contact the seller.
+    '''
+    conn = dbi.connect()
+    #If the request is GET.
+    if request.method == 'GET': 
+        #Get the database dictionary of the item given its ID.
+        item = listing.get_listing(conn, item_identifier)
+        username = session['username'] + '@wellesley.edu'
+        ifLoggedIn = 'username' in session
+        return render_template("item_page.html",username=username,listing = item, 
+                                page_title=item['item_name'], loggedin = ifLoggedIn)
+    #If the request is POST.
+    if request.method == "POST":
+        #If the seller wishes to update their listing.
+        if request.form['submit'] == 'update':
+            name = request.form['name']
+            categories = (',').join(request.form.getlist('category'))
+            description = request.form['description']
+            condition = request.form['condition']
+            price = request.form['price']
+            if (price == 0): 
+                free = True
+            else:
+                free = False
+            sellmode = (',').join(request.form.getlist('sellmode'))
+            status = request.form['status']
+            #Update the listing.
+            updated_listing = listing.update(conn,item_identifier,status,name,categories,free,
+                                description,condition,price,sellmode)
+            username = session['username'] + '@wellesley.edu'
+            flash('Your item has been updated!')
+            #Re-render the item page with the correct values.
+            ifLoggedIn = 'username' in session
+            return render_template('item_page.html',username=username,listing=updated_listing,
+                                page_title=name, loggedin = ifLoggedIn) 
+
+#creates the feed for the user to view all listings 
+#of items that are not sold
+@app.route("/listings/", methods=['POST','GET'])
+def listings():
+    '''
+       Renders a page will all listings stated as "Still Available".
+    '''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    orderings = ('Price: Low to High', 'Price: High to Low', 
+                'Oldest to Newest', 'Newest to Oldest')
+    if request.method == 'GET':
+        try:
+            # don't trust the URL; it's only there for decoration
+            if 'username' in session:
+                conn = dbi.connect()
+                results =  listing.get_listings_by_timestamp(conn, "newest")
+                ifLoggedIn = 'username' in session
+                return render_template("listings.html", listings = results, page_title='All listings', 
+                categories = item_categories, possible_orderings = orderings, loggedin = ifLoggedIn)
+            else:
+                flash('You are not logged in. Please log in or join')
+                return redirect( url_for('login') )
+        except Exception as err:
+            flash('some kind of error '+str(err))
+    elif request.method == 'POST':
+        action = request.form['submit-btn']
+        if action == "Choose Category":
+            selected_category = request.form.get("menu-category")
+            flash("Listings in {} Category".format(selected_category))
+            return redirect(url_for('listings_by_category', category = selected_category))
+        elif action == "Select Order":
+            selected_order = request.form['menu-order']
+            if selected_order == orderings[0]:
+                order = "cheap" 
+                flash("Listings ordered by price, from low to high")
+                return redirect(url_for('listings_by_price', order = order))   
+            elif selected_order == orderings[1]:
+                order = "expensive"
+                flash("Listings ordered by price, from high to low") 
+                return redirect(url_for('listings_by_price', order = order))
+            elif selected_order == orderings[2]:
+                order = "oldest"
+                flash("Listings ordered by when added, from oldest to newest")
+                return redirect(url_for('listings_by_timestamp', timestamp = order))
+            elif selected_order == orderings[3]:
+                order = "newest"
+                flash("Listings ordered by when added, from newest to oldest")
+                return redirect(url_for('listings')) #newest to oldest by default 
+
+@app.route("/updatelisting/<int:item_identifier>")
+def update_listing(item_identifier):
+    '''
+        Retreives information from database about the listing to be updated.
+        Renders the form to update a listing.
+    '''
+    conn = dbi.connect()
+    item = listing.get_listing(conn,item_identifier)
+    all_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                        'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    all_conditions = ('Brand New','Gently Used','Well Loved')
+    all_sellmodes = ('For Sale','For Rent','For Trade')
+    all_statuses = ('Still Available','Awaiting Pickup','Sold')
+    ifLoggedIn = 'username' in session
+    return render_template("update.html",
+                            listing = item,
+                            page_title="Update Listing",  
+                            loggedin = ifLoggedIn,
+                            all_categories=all_categories,
+                            all_conditions=all_conditions,
+                            all_sellmodes=all_sellmodes,
+                            all_statuses=all_statuses)
+
+@app.route("/deletelisting/<int:item_identifier>",methods=['POST','GET'])
+def delete_listing(item_identifier):
+    '''
+        Renders a page that asks the user if they are sure they want to delete this listing.
+        Different from setting status to 'Awaiting Pickup' or 'Sold'.
+    '''
+    conn = dbi.connect()
+    if request.method == 'GET':
+        listing_delete = listing.get_listing(conn,item_identifier)
+        ifLoggedIn = 'username' in session
+        return render_template("delete.html", listing = listing_delete, loggedin = ifLoggedIn )
+    elif request.method == 'POST':
+        deleted_listing = listing.delete(conn,item_identifier)
+        flash('Your listing was successfully deleted.')
+        return redirect(url_for('index'))
+
+#Processes users query for a certain item.
+#Handles queries differently based on whether the query has any matches in the database.
+@app.route('/search/') 
+def query():
+    '''
+       Renders search.
+    '''
+    item_categories = ('Clothing','Accessories','Dorm Essentials','Beauty',
+                'School Supplies','Tech','Furniture','Textbooks','Food','Other')
+    item_orderings = ('Price: Low to High', 'Price: High to Low', 
+                     'Oldest to Newest', 'Newest to Oldest')
+    try:
+        if 'username' in session:
+            username = session['username'] + '@wellesley.edu'
+            session['visits'] = 1+int(session['visits'])
+    
+            conn = dbi.connect()
+            curs = dbi.dict_cursor(conn)
+            query = request.args['search']
+        
+            #will include searching tags in the beta if have time 
+            # get all listings in db that has this query as part of its name, description, 
+            #or category
+            sql = '''select * from item where item_name like %s 
+            or category like %s or item_description like %s''' #joining because don't want duplicates
+            vals = ['%' + query + '%', '%' + query + '%', '%' + query + '%'] 
+            curs.execute(sql, vals)
+            results = curs.fetchall()
+            
+            #process query based on how many items from the database matched the query:
+            if len(results) == 0:  
+                flash("Sorry, no items were found!") #
+                return redirect(request.referrer)                 
+            elif len(results) == 1:  
+                item_id = results[0].get("item_id")
+                flash("Search results: one item found") 
+                return redirect(url_for('item_page', item_identifier = item_id))
+            elif len(results) > 1:
+                flash("Search results: {number_items} item found".format(number_items = len(results)))
+                ifLoggedIn = 'username' in session 
+                return render_template('listings.html', listings = results, 
+                                        page_title ='Listings Found',
+                                     categories = item_categories, 
+                                     possible_orderings = item_orderings, 
+                                     loggedin = ifLoggedIn )
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
+#Renders page with feed showing the user all their favorited items
+@app.route("/favorites/") 
+def favorites():
+    '''
+       Renders page with feed showing the user all their favorited items
+    '''
+    try:
+        # don't trust the URL; it's only there for decoration
+        if 'username' in session:
+            conn = dbi.connect()
+            results =  listing.get_favorites(conn, 'username')
+            ifLoggedIn = 'username' in session
+            return render_template("favorites.html", listings = results, page_title='Favorite items', 
+                                    loggedin = ifLoggedIn)
+        else:
+            flash('You are not logged in. Please log in or join')
+            return redirect( url_for('login') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('login') )
+
+#Initialize
+@app.before_first_request
+def init_db():
+    dbi.cache_cnf()
+    db_to_use =  'gem_db'
+    dbi.use(db_to_use)
+
+if __name__ == '__main__':
+    dbi.cache_cnf()  
+    dbi.use('gem_db')
+    import sys, os
+    if len(sys.argv) > 1:
+        # arg, if any, is the desired port number
+        port = int(sys.argv[1])
+        assert(port>1024)
+    else:
+        port = os.getuid()
+    app.debug = True
+    app.run('0.0.0.0',port)#Gem project.
+#March 2021
+#Rebecca, Christine, Natalie, Fatima
+
+import cs304dbi as dbi
+import os 
+
+
+def insert_listing(conn,name,seller_id,category,free,description,condition,price,sellmode,image):
+    '''
+       Takes a database connection, item name (str), item categories (str), 
+       if the item is free (boolean), item description (str), 
+       item condition (str), item price (int), and if the item is 
+       for sell/rent/trade (str). 
+       Inserts all of the information into the item table in the database.
+       Returns the ID of that item, as IDs are autoincremented.
+    '''
+    status = 'Still Available'
+    curs = dbi.dict_cursor(conn)
+    
+    curs.execute('''
+        insert into item(item_name,seller_id,category,free,status,item_condition,item_description,
+                        price,sellmode,image)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+        [name,seller_id,category,free,status,condition,description,price,sellmode,image]) 
+    conn.commit()
+    curs.execute('''select last_insert_id()''')
+    itemID = curs.fetchone()
+    return itemID['last_insert_id()']
+
+#Update a listing.
+def update(conn,item_identifier,status,name,category,free,description,condition,price,sellmode):
+    '''
+        Takes a database connection, the item ID (int), item name (str), 
+        item categories (str), if the item is free (boolean), 
+        item description (str), item condition (str), item price (int), 
+        if the item is for sell/rent/trade (str).
+        Updates the values of the specified item in item table.
+        Returns the a dictionary with all of the item's updated information.
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+                update item set item_name=%s,status=%s,category=%s,free=%s,item_description=%s,
+                item_condition=%s,price=%s,sellmode=%s
+                where item_id=%s''',
+                [name,status,category,free,description,condition,price,sellmode,item_identifier])
+    conn.commit()
+    result = get_listing(conn,item_identifier)
+    return result
+
+#Delete listing.
+def delete(conn,item_identifier):
+    '''
+        Deletes an item from the database as per the user's request.
+        Different from setting an item to 'Awaiting Pickup' or 'Sold'.
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+            delete from item
+            where item_id = %s''',
+            [item_identifier])
+    conn.commit()
+    result = get_listing(conn,item_identifier)
+    if result == None:
+        deleted = True
+    else:
+        deleted = False
+    return deleted
+
+
+
+#Retrieve items that current user favorited
+def get_favorites(conn, username): 
+    '''
+       Retrieve items that current user favorited.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from favorites where buyer_id = %s'''
+    val = [username]
+    
+    curs.execute(sql, val)
+    results = curs.fetchall()
+    return results
+
+
+#Retrieve the listing corresponding to a given item id.
+def get_listing(conn, item_identifier): 
+    '''
+       Takes a database connection and ID for a particular item in a table. 
+       Retrieves all the information for that item from the item table.
+       Returns a single dictionary with the item information.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from item where item_id = %s '''
+    val = [item_identifier]
+    curs.execute(sql, val)
+    results = curs.fetchone()
+    return results
+
+
+#Renders a page will all listings stated as "Still Available" in 
+#sorted order, cheapest to most expensive
+def get_listings_by_price(conn, order): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" in sorted order by price. 
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+    if order == 'cheap':
+        sql = '''select  * from item where status <> 'Sold' order by price asc'''
+    else:
+        sql = '''select  * from item where status <> 'Sold' order by price desc'''
+    curs = dbi.dict_cursor(conn)
+    curs.execute(sql)
+    results = curs.fetchall()
+    return results
+    
+
+#Renders a page will all listings stated as "Still Available" for certain category
+def get_listings_by_category(conn, category): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" by category
+       Returns a list of dictionaries that contain all of the 
+       information for those items.
+    '''
+    curs = dbi.dict_cursor(conn)
+    sql  = '''select  * from item where status <> 'Sold' and category like %s ''' 
+    val = ["%" + category + "%" ]
+    curs.execute(sql, val)
+    results = curs.fetchall()
+    return results
+
+
+#Renders a page will all listings stated as "Still Available" by their timestamp
+#i.e. either newest to oldest, or newest to oldest
+def get_listings_by_timestamp(conn, timestamp): 
+    '''
+       Takes an database connection. 
+       Retrieves all of the listings in the item table that 
+       are marked as "Still Available" by timestamp
+       Returns a list of dictionaries that contain all of the 
+       information for those items, ordered by when they were added to the db.
+    '''
+    curs = dbi.dict_cursor(conn)
+    if timestamp == "newest":
+        sql  = '''select  * from item where status <> 'Sold' order by timestamp desc'''
+    elif timestamp == "oldest":
+        sql = '''select  * from item where status <> 'Sold' order by timestamp asc'''
+    curs.execute(sql)
+    results = curs.fetchall()
+    return results
+
+
+
+    
+#Get listings for a particular seller.
+def get_my_listings(conn, username):
+    '''
+        Takes a database connection and the username of the current user.
+        Retrieves all listings from the item table created by the user.
+        Returns all information in a list of dictionaries, each
+        representing a listing.
+    '''
+    curs = dbi.dict_cursor(conn)
+    curs.execute('''
+            select * from item where seller_id = %s''',
+            [username])
+    results = curs.fetchall()
+    return results
+
+def do_files(dirname, conn, func):
+    '''iterates over all files in the given directory (e.g. 'uploads'),
+invoking function on conn, the full pathname, the filename and the
+digits before the dot (e.g. 123.jpq).
+
+    '''
+    for name in os.listdir(dirname):
+        path = os.path.join(dirname, name)
+        if os.path.isfile(path):
+            # note that we are reading a *binary* file not text
+            with open(path,'rb') as f:
+                print('{} of size {}'
+                      .format(path,os.fstat(f.fileno()).st_size))
+            '''nm,ext = name.split('.')'''
+            '''if nm.isdigit():
+                func(conn, path, name, seller_id)'''
+    
+def insert_picfile(conn, path, filename, seller_id):
+    '''Insert name into the picfile table under key nm.'''
+    curs = dbi.cursor(conn)
+    try:
+        curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
+                   on duplicate key update filename = %s''',
+                     [seller_id,filename,filename])
+        conn.commit()
+    except Exception as err:
+        print('Exception on insert of {}: {}'.format(name, repr(err)))
+
+#Testing.
+if __name__ == '__main__':
+    dbi.cache_cnf()  
+    dbi.use('gem_db')
+    conn = dbi.connect()
+  
+
+
+
+
+<!--This is the base page that all other pages are styled from.
+Contains the base Jinja template structure-->
+
+<!doctype html>
+<html lang='en'>
+
+
+  <head>
+    <meta charset='utf-8'>
+    <!-- for mobile-friendly pages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=author content="Gem team: Christine, Natalie, Fatima, Rebecca">
+    <title>{{ page_title }}</title>
+
+    <!-- ordered style sheets in a way that creates appropriate overriding of styles.  -->
+    <link rel="shortcut icon" type = "image/jpg" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+    <link rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    {% block head_stuff %} {% endblock %}
+    
+    
+  </head>
+
+
+  <body>
+    <!-- navbar that will be on every page -->
+    <nav class="topnav">
+      <a class="active" href="{{url_for('index')}}">Home</a>
+      <a href="{{url_for('listings')}}">Items for Sale</a>
+      <a href="{{url_for('create_listing')}}">List an Item</a>
+      <a href="{{url_for('profile')}}">Profile</a>
+      
+      <!-- display log in if user logged out,  and log out if user  logged in -->
+      {% if loggedin %}
+        <a href="{{url_for('logout')}}"> Log Out</a>
+      {% endif %}
+      {% if not loggedin %}
+        <a href="{{url_for('login')}}"> Log In</a> 
+      {% endif %}
+   
+      <div class="search-container" id = search>
+        <form action="{{url_for('query')}}">
+          <button type="submit"><i class="fa fa-search"> Submit</i></button>
+          <input  aria-label="searchbar" type="text" placeholder="Search.." required name="search">        
+        </form>
+      </div>
+    </nav>
+   
+    
+    <!-- will display flashed messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="messages">
+      {% for msg in messages %}
+          <h3>{{msg}}</h3>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+
+    {% block main_content %}
+    <h1>Welcome to Gem!</h1>
+    {% endblock %}
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    {% block end_scripts %}
+    {% endblock %}
+  </body>
+</html><!--Delete confirmation page-->
+{% extends "base.html" %}
+
+{% block head_stuff %}
+{% endblock %}
+
+{% block main_content %}
+<p>Are you sure you want to delete this post?</p>
+<form method = 'POST' action = '{{ url_for("delete_listing", item_identifier=listing.item_id)}}'>
+    <button type="Submit" name="submit" value="delete">Delete My Listing</button>   
+</form>
+{% endblock %}<!--page to view a single listing-->
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'item_page_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+    <!-- for loop used to extract the dictionary from the list. 
+    The dictionary contains all  of the listing's information -->
+    <!-- Item Section -->
+    <div class="w3-row w3-padding-64" id="listing_details">
+        <div class="w3-col l6 w3-padding-large">
+            <h1 class="w3-center">Item Name: {{listing.item_name}}</h1><br>
+            
+            <h4>The item is for:</h4>
+            <p class="w3-text-grey">{{listing.sellmode}}</p><br>
+
+            <h4>Category</h4>
+            <p class="w3-text-grey">{{listing.category}}</p><br>
+
+            <!--Status is whether the item is sold already, or not. -->
+            <h4>Status</h4>
+            <p class="w3-text-grey">{{listing.status}}</p><br>
+
+            <h4>Condition</h4>
+            <p class="w3-text-grey">{{listing.item_condition}}</p><br>
+
+            <h4>Description</h4>
+            <p class="w3-text-grey">{{listing.item_description}}</p><br>
+
+            <h4>Price</h4>
+            <p class="w3-text-grey">{{listing.price}}</p><br>
+
+            <h4>Contact information</h4>
+            <p class="w3-text-grey">{{listing.seller_id}}</p>
+        </div>
+
+
+        <div class="w3-col l6 w3-padding-large">
+            <img src= "{{url_for('pic',image=listing.image)}}" 
+                class = "w3-round w3-image w3-opacity-min"
+                alt="{{listing.item_name}}" style="width:100%"> 
+        </div>
+    </div>
+   
+    
+    <!--Update Button-->
+    {% if username == listing.seller_id %}
+        <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Update
+            </button>
+        </a>
+
+        <a href = "{{ url_for('delete_listing',item_identifier=listing.item_id) }}">
+            <button class="w3-button w3-light-grey w3-section center">
+                Delete
+            </button>
+        </a>
+    {% endif %}
+{% endblock %}<!--form to add a listing to the database-->
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
+{% endblock %}
+
+{% block main_content %}
+<div class="w3-container w3-padding-64" id="listingform">
+    <h1>Sell your stuff that you no longer use! </h1><br>
+    <h5>Have stuff in your room that you never use? List it for sale and make some $$!
+        You can always delete or update an item listing later.</h5>
+    <form target="_blank" class="search" method="POST" action="{{ url_for('create_listing') }}" 
+        enctype = "multipart/form-data">
+        
+        <br>
+        <div>
+        
+            
+        <br>
+        <br>
+        <label>Upload an image: 
+            <input type = "file" aria-label="image-of-listing" name = "pic" required/> 
+        </label>
+
+        {% if src != '' %}
+        <p><img src="{{src}}"></p>
+        {% endif %}
+
+        </div>
+        <div>
+            <label>Item Name (model, make, and/or brand):
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="A name for your item" required name="name">
+            </label>
+        </div>
+        <br>
+
+        <div> 
+            <p>Category:</p>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Clothing">
+                    Clothing
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input  type=checkbox name="category" value="Accessories">
+                    Accessories
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Dorm Essentials">
+                    Dorm Essentials
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="Beauty">
+                    Beauty
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type=checkbox name="category" value="School Supplies">
+                    School Supplies
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Tech">
+                    Tech
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Furniture">
+                    Furniture
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Textbooks">
+                    Textbooks
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Food">
+                    Food
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type=checkbox name="category" value="Other">
+                    Other
+                </label>
+            </div>
+        </div>   
+        <br>
+        <div> 
+            <label> Item Description:
+                <input class="w3-input w3-padding-16" type="text" 
+                placeholder="Short description of  your item" required
+                        name="description">
+            </label>
+        </div>
+        <br>
+        <div> 
+            <p>Condition:</p>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Brand New">
+                    Brand New
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Gently Used">
+                    Gently Used
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input required type="radio" name="condition" value="Well Loved">
+                    Well Loved
+                </label>
+            </div>
+        </div>
+        <!-- Whether the item is for sale, rent, or trade -->
+        <br>
+        <div> 
+            <p>Available for:</p>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Sale">
+                    Sell
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Rent">
+                    Rent
+                </label>
+            </div>
+            <div>
+                <label> 
+                    <input type="checkbox" name="sellmode" value="For Trade">
+                    Trade
+                </label>
+            </div>
+        </div>
+        <br>
+        <div> 
+            <label>Price in dollars:
+                <input class="w3-input w3-padding-16" type="number" 
+                placeholder="Price you are selling for" required name="price" min="0">
+            </label>
+        </div>
+        <br>
+        <div>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="insert">Create listing</button>
+        </div>
+    </form>
+</div>
+{% endblock %}<!--page to view all available listings-->
+{% extends "base.html" %}
+
+
+{% block head_stuff %}
+<!-- A few styles that are specific to this html page -->
+<link rel='stylesheet' href="{{url_for('static', filename = 'listings_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+    <h1> Listings</h1>
+    <!-- the select category menu -->   
+    <div class = "menu-form"> 
+        <form method=POST action="{{url_for('listings')}}" >
+          <label for="menu-category">Search by category:</label>
+          <select name="menu-category" id="menu-category">
+              <!--Fills out the drop down menu with the item categories-->
+              {% for category in categories %}
+              <option value="{{category}}">{{category}}</option>   
+              {% endfor %}
+          </select>
+          <input type="submit" name="submit-btn" value="Choose Category">
+        
+
+        <!-- the menu for ordering by price-->     
+        <label for="menu-order">Order by:</label>
+        <select name="menu-order" id="menu-order">
+            <!--Fills out the drop down menu with incomplete movies-->
+            {% for order in possible_orderings %}
+            <option value="{{order}}">{{order}}</option>   
+            {% endfor %}
+        </select>
+        <input type="submit" name="submit-btn" value="Select Order">
+        </form>
+    </div>  
+
+
+    <!--listings to display-->
+    {% for listing in listings %}
+
+    <!-- separate divs for formatting reasons: 
+      taken from W3 schools image gallery template-->
+    <div class="responsive">
+      <div class="gallery">
+
+        <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
+          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" 
+              width="600" height="400">
+      
+              
+        </a>
+        <!-- listing info that will show for each listing to display -->
+        <div class="desc">{{listing.item_name}}</div>
+        <div class="desc">${{listing.price}}</div>
+      </div>
+
+    </div>
+    {% endfor %}
+{% endblock %}<!--page that contains the form to log in to Gem-->
+{% extends "base.html" %}
+
+<!-- additional styles -->
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+<link rel='stylesheet' href="{{url_for('static', filename = 'login.css')}}">
+
+{% endblock %}
+
+
+{% block main_content %}
+  <div class="hero-image">
+    <img src="{{url_for('static', filename='images/gem-icon.png')}}" alt="Pink Gem Icon">
+    <div class="hero-text">
+      <h1>Log In</h1>
+
+      <form id="loginform" action="{{url_for('login')}}" method="post">
+          <p><label>Email address: <input type="text" name="email" required ></label></p>
+          <!-- required pattern="^\w+$" -->
+          <p><label>Password: <input type="password" name="password" required></label></p>
+          <p><button value = "login" type="submit">Submit</button></p>
+      </form>
+      
+        <p>Don't have an account? <a href="{{url_for('join')}}">Click here to register</a></p>
+   
+  </div>
+</div>
+{% endblock %}
+
+
+{% block end_scripts %}
+<script>
+$("#joinform").on('submit', function (event) {
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     // should also check for length and common words etc
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+         alert("passwords don't match");
+     }
+});
+</script>
+{% endblock %}
+
+<!--homepage for Gem-->
+{% extends "base.html" %}
+
+<!-- additional styles -->
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+
+
+<div class="hero-image">
+  <img src="{{url_for('static', filename='images/gem-icon.png')}}" alt="Pink Gem Icon">
+  <div class="hero-text">
+
+
+    <h1>Welcome to Gem!</h1>
+
+    <p>Gem is the one stop shop for buying and selling
+      pre-loved items within the Wellesley College community!
+      Who knows... you might make a little
+      bit of cash or find a new pre-loved Gem!</p>
+
+    <a href = "{{ url_for('listings') }}">Explore items for sale</a>
+    <a href = "{{ url_for('create_listing') }}">Sell an item</a>
+  </div>
+</div>
+{% endblock %}<!--profile page that displays a user's listings-->
+{% extends "base.html" %}
+{% block head_stuff %}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href="{{url_for('static', filename = 'listings_style.css')}}">
+{% endblock %}
+
+
+{% block main_content %}
+
+<h1>Your Listings:</h1>
+    <!-- "listings" contains all of the listings in the database not marked as "Sold" -->
+    {% for listing in listings %}
+
+    <!-- separate divs for formatting reasons: 
+      taken from W3 schools image gallery template-->
+    <div class="responsive">
+      <div class="gallery">
+        <!-- For now, we are hardcoding the image, since have not  implemented storing the 
+          image in the database yet. -->
+        <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
+          <img src= "{{url_for('pic',image=listing.image)}}" alt="{{listing.item_name}}" 
+              width="600" height="400">
+        </a>
+        <!-- listing info that will show for each listing -->
+        <div class="desc">{{listing.item_name}}</div>
+        <div class="desc">${{listing.price}}</div>
+        
+        {% if name == listing.seller_id %}
+            <a  href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">Update</a>
+            <a  href="{{ url_for('delete_listing',item_identifier=listing.item_id) }}">Delete</a>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+{% endblock %}
+
+
+{% block end_scripts %}
+{% endblock %}<!--page that contains the form to register for an account-->
+{% extends "base.html" %}
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'main_style.css')}}">
+<link rel='stylesheet' href="{{url_for('static', filename = 'login.css')}}">
+{% endblock %}
+
+{% block main_content %}
+
+<div class="hero-image">
+  <img src="{{url_for('static', filename='images/gem-icon.png')}}" alt="Pink Gem Icon">
+  <div class="hero-text">
+  <h2>Register</h2>
+
+  <form id="joinform" action="{{url_for('join')}}" method="post">
+    <label>When filling out this form, use your @wellesley.edu credentials. For example, 
+          if your email address is 'abcd@wellesley.edu', then your username is 'abcd'.</label>
+    <p><label>Wellesley email address: <input type="email" name="email" 
+                                         required pattern="[a-z.]*[@]\bwellesley.edu"></label></p>
+    <p><label>Wellesley username: <input type="text" name="username" required></label></p>
+    <p><label>Password: <input type="password" name="password1" required></label></p>
+    <p><label>Password again: <input type="password" name="password2" required></label></p>
+    <p><button type="submit">Submit</button></p>
+</form>
+</div>
+</div>
+
+{% endblock %}
+
+{% block jquery_scripts %}
+<script>
+$("#joinform").on('submit', function (event) {
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     // should also check for length and common words etc
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+         alert("passwords don't match");
+     }
+});
+</script>
+{% endblock %}
+<!--
+    File Name: update.html
+    Project: Gem
+    Date: Spring 2021
+    Authors: RA, NR, CP, FI
+-->
+{% extends "base.html" %}
+
+{% block head_stuff %}
+<link rel='stylesheet' href="{{url_for('static', filename = 'listing_form_style.css')}}">
+{% endblock %}
+
+{% block main_content %}
+
+<div class="w3-container w3-padding-64" id="listingform">
+    <h1>Sell your stuff that you no longer use! </h1><br>
+    <h5>Have stuff in your room that you never use? List it for sale and make some $$!
+        You can always delete or update an item listing later.</h5>
+    <form target="_blank" class="search" method="POST" 
+        action="{{ url_for('item_page',item_identifier=listing.item_id) }}">
+        <div>
+            <p>Status:</p>
+                {% for status in all_statuses: %}
+                    {% if status in listing.status: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}" checked>
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% else: %}
+                    <div>
+                        <label>
+                            <input type=radio name="status" value="{{ status }}">
+                            {{ status }}
+                        </label>
+                    </div>
+                    {% endif %}
+                {% endfor %} 
+        </div>
+        <br>
+        <div>
+            <label>Item Name (model, make, and/or brand):
+                <input class="w3-input w3-padding-16" type="text" 
+                      value="{{ listing.item_name }}" name="name">
+            </label>
+        </div>
+        <br>
+        <div>
+            <p>Image: {{ listing.image }}</p>
+        </div>
+        <br>
+        <div> 
+            <p>Categories:</p>
+            {% for category in all_categories: %}
+                {% if category in listing.category: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}" checked>
+                        {{ category }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="category" value="{{ category }}">
+                        {{ category }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <label> Item Description:
+                <input class="w3-input w3-padding-16" type="text" 
+                    value="{{ listing.item_description }}" name="description">
+            </label>
+        </div>
+        <br>
+        <div> 
+            <p>Condition:</p>
+            {% for condition in all_conditions: %}
+                {% if condition in listing.item_condition: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}" checked>
+                        {{ condition }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=radio name="condition" value="{{ condition }}">
+                        {{ condition }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <p>Available For:</p>
+            {% for sellmode in all_sellmodes %}
+                {% if sellmode in listing.sellmode: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}" checked>
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% else: %}
+                <div>
+                    <label>
+                        <input type=checkbox name="sellmode" value="{{ sellmode }}">
+                        {{ sellmode }}
+                    </label>
+                </div>
+                {% endif %}
+            {% endfor %} 
+        </div>
+        <br>
+        <div> 
+            <label>Price in dollars:
+                <input class="w3-input w3-padding-16" type="number" 
+                value="{{ listing.price }}" name="price" min="0">
+            </label>
+        </div>
+        <br>
+        <div>
+            <button class="w3-button w3-light-grey w3-section center" 
+            type="submit" name="submit" value="update">Update</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+/* additional styles for item_page.html */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+#listing_details {
+    padding: 2em;
+  }
+
+/* overrides styling in style.css */
+  h4 { 
+    text-align: left;
+}/* additional styles for listing form */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+#listingform {
+    padding: 2em;
+}
+
+div { 
+    padding-bottom: 3em;
+}
+/* additional styles for listing.html */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+
+/* styles the individual listings: */
+div.gallery {
+  border: 1px solid #ccc;
+  margin: 1em;
+}
+
+div.gallery:hover {
+  border: 1px solid #777;
+}
+
+div.gallery img {
+  width: 100%;
+  height: auto;
+}
+
+/* styles the text descriptions: */
+div.desc {
+  padding: 15px;
+  text-align: center;
+}
+
+/* styles all of the listings: */
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* styles the title: */
+h1 { 
+    display: block; 
+    margin: auto;
+    text-align: center;
+    padding:2em;
+    font-family: "Times New Roman", Georgia, Serif;
+}
+
+
+/* styles the filter menus: */
+.menu-form { 
+  display: inline-block; 
+  margin: auto;
+  text-align: center;
+  padding-bottom:3em;
+  width: 100%;
+}
+
+.menu-form form { 
+ 
+  padding-bottom: 1em;
+
+}
+
+
+
+
+
+
+/* additional styles for login.html */
+/* written by the Gem team */
+/* March 21, 2021 */
+
+/*Creates gradient hero image and makes responsive */
+.hero-image {
+    background-image: url("../static/images/login-background.jpg");
+}
+
+img {
+    opacity: 75%;
+    margin-left: 20%;
+    margin-top: 12%;
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+  }/* styles for main page*/
+/* Adapted from W3 schools template, and tweaked by Gem team */
+/* March 21, 2021 */
+
+
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: "Times New Roman", Georgia, Serif;
+  text-decoration: none !important;
+}
+
+/*Creates gradient hero image and makes responsive */
+.hero-image {
+  background-image: url("../static/images/splash-page.jpg");
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+}
+
+ /*Styles and positions content in center of page */
+.hero-text {
+  text-align: left;
+  position: absolute;
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-bottom: 20px;
+  top: 50%;
+  left: 66%;
+  transform: translate(-50%, -50%);
+  color: black;
+  background-color: rgb(255, 255, 255, 0.5);
+}
+
+ /*Styles buttons that are in center of page: */
+.hero-text button {
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 10px 25px;
+  color: black;
+  background-color: rgb(255, 255, 255);
+  text-align: center;
+  cursor: pointer;
+}
+
+.hero-text button:hover {
+  background-color: rgb(241, 144, 197);
+  color: rgb(255, 255, 255);
+  display: inline-flex;
+  padding-right: 2em;
+  
+}
+
+/* Styles page header */
+h1 { 
+  font-size: 50px;
+  text-align: left !important;
+}
+
+a { 
+  text-decoration: none; 
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 10px 25px;
+  color: black;
+  background-color: rgb(255, 255, 255);
+  text-align: center;
+  cursor: pointer;
+}
+
+a:hover{
+  background-color: rgb(241, 144, 197);
+  color: rgb(255, 255, 255);
+  display: inline-flex;
+  
+}
+
+
+img {
+  opacity: 75%;
+  margin-left: 20%;
+  margin-top: 12%;
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.responsive {
+  padding: 0 6px;
+  float: left;
+  width: 24.99999%;
+}
+
+@media only screen and (max-width: 700px) {
+  .responsive {
+  width: 49.99999%;
+  margin: 6px 0;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .responsive {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* styles for base template and all that inherit the template  */
+/* written by the Gem team, adapted from W3 schools */
+/* March 21, 2021 */
+
+* {box-sizing: border-box;}
+  
+
+/* styling the text */
+body {
+  margin: 0;
+  font-family: "Times New Roman", Georgia, Serif;
+  text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Times New Roman", Georgia, Serif;;
+    text-align: center;
+}
+
+
+
+/* styles that apply to the nav bar for all pages */
+.topnav {
+  overflow: hidden;
+  background-color: rgb(241, 144, 197);
+  font-family: "Times New Roman", Georgia, Serif;
+}
+      
+.topnav a {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+  background-color: #e9e9e9;
+}
+      
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+  text-decoration: none;
+}
+
+.topnav a.active {
+  background-color: rgb(241, 144, 197);
+  color: white;
+  text-decoration: none;
+}
+      
+.topnav input[type=text] {
+  float: right;
+  padding: 6px;
+  margin-top: 8px;
+  margin-right: 16px;
+  border: none;
+  font-size: 17px;
+}
+
+
+/* styles the flashed messages */
+#messages{ 
+  text-align: center;
+  padding: 20px;
+  font-family: "Times New Roman", Georgia, Serif;
+  font-size:12px;
+}
+
+
+/* makes navbar white rather than the default pink */
+.topnav {
+  overflow: hidden;
+  background-color: #e9e9e9;
+}
+
+/* makes the active button black rather than the default pink */
+.topnav a.active {
+  background-color: black;
+  color: white;
+  text-decoration: none;
+}
+
+/* styles the search bar button */
+.topnav .search-container button {
+  float: right;
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-right: 16px;
+  background: #ddd;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  font-family: "Times New Roman", Georgia, Serif;
+}
+
+
+/* makes the nav bar more responsive to changes in  screen size */
+@media screen and (max-width: 600px) {
+  .topnav input[type=text] {
+    border: 1px solid #ccc;  
+  }
+
+  .topnav .search-container {
+    float: none;
+  }
+  .topnav a, .topnav input[type=text], .topnav .search-container button {
+    float: none;
+    display: block;
+    text-align: left;
+    width: 100%;
+    margin: 0;
+    padding: 14px;
+  }
+ 
+}
+
+/* makes the website more responsive to changes in screen size */
+.responsive {
+  padding: 0 6px;
+  float: left;
+  width: 24.99999%;
+}
+
+@media only screen and (max-width: 700px) {
+  .responsive {
+  width: 49.99999%;
+  margin: 6px 0;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .responsive {
+    width: 100%;
+  }
+}
