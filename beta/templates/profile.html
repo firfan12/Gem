@@ -27,8 +27,8 @@
         <div class="desc">${{listing.price}}</div>
         
         {% if name == listing.seller_id %}
-            <a href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">Update</a>
-            <a href="{{ url_for('delete_listing',item_identifier=listing.item_id) }}">Delete</a>
+            <a  href = "{{ url_for('update_listing',item_identifier=listing.item_id) }}">Update</a>
+            <a  href="{{ url_for('delete_listing',item_identifier=listing.item_id) }}">Delete</a>
         {% endif %}
       </div>
 

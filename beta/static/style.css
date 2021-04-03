@@ -2,8 +2,6 @@
 /* written by the Gem team, adapted from W3 schools */
 /* March 21, 2021 */
 
-
-
 * {box-sizing: border-box;}
   
 
@@ -36,6 +34,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 14px 16px;
   text-decoration: none;
   font-size: 17px;
+  background-color: #e9e9e9;
 }
       
 .topnav a:hover {
@@ -95,6 +94,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "Times New Roman", Georgia, Serif;
 }
 
+
 /* makes the nav bar more responsive to changes in  screen size */
 @media screen and (max-width: 600px) {
   .topnav input[type=text] {
@@ -114,7 +114,6 @@ h1, h2, h3, h4, h5, h6 {
   }
  
 }
-
 
 /* makes the website more responsive to changes in screen size */
 .responsive {
