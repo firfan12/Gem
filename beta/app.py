@@ -12,10 +12,8 @@ app = Flask(__name__)
 
 import cs304dbi as dbi
 import listing  #imports helper methods
-# import cs304dbi_sqlite3 as dbi
 import random
 import bcrypt
-import logins
 import sys, os, random
 import imghdr
 
@@ -77,7 +75,6 @@ def join():
             session['logged_in'] = True
             session['visits'] = 1
             return redirect(url_for('profile'))
-            #return redirect( url_for('user', username=username) )
         except Exception as err:
             flash('form submission error '+str(err))
             return redirect( url_for('index') )
@@ -114,7 +111,6 @@ def login():
                 session['logged_in'] = True
                 session['visits'] = 1
                 return redirect(url_for('index'))
-                #return redirect( url_for('user', username=username) )
             else:
                 flash('Login incorrect. Try again or join')
                 return redirect( url_for('login'))
@@ -214,7 +210,6 @@ def create_listing():
             categories = (',').join(request.form.getlist('category'))
             if not categories: #since empty strings are falsy
                 categories = 'Other'
-
             description = request.form['description']
             condition = request.form['condition']
             price = request.form['price']
@@ -225,15 +220,12 @@ def create_listing():
             sellmode = (',').join(request.form.getlist('sellmode'))
             if not sellmode:
                 sellmode = 'For Sale'
-            print("the sellmode is : " + sellmode)
             seller_id = session['username']
             email = seller_id + "@wellesley.edu"
             #File Uploads:
             try:
                 f = request.files['pic']
                 filename = f.filename
-                #ext = user_filename.split('.')[-1]
-                #filename = secure_filename('{}.{}'.format(user_filename,ext))
                 pathname = os.path.join(app.config['UPLOADS'],filename)
                 f.save(pathname)
             except Exception as err:
@@ -241,13 +233,13 @@ def create_listing():
                 return render_template('listing_form.html',src='')
             
             image = filename
-            #Should this be outsourced to listing.py?
+            
             curs = dbi.dict_cursor(conn)
             curs.execute('''insert into uploads(seller_id,filename) values (%s,%s)
                 on duplicate key update filename = %s''',
                     [email,filename,filename])
             conn.commit()
-            #flash('Upload successful')
+            
             #Insert into DB, retreive itemID.
             insert_sellerID = seller_id + '@wellesley.edu'
             item_identifier = listing.insert_listing(conn,name,insert_sellerID,categories,free,
@@ -255,7 +247,7 @@ def create_listing():
             flash("Congrats! Your item is now listed for sale")
             #Redirect to itemPage URL with the item ID.
             return redirect(url_for('item_page',item_identifier = item_identifier))
-        #Do I need to through an error here?
+       
     return redirect('<p>Error</p>')  
 
 
@@ -326,8 +318,6 @@ def listings_by_timestamp(timestamp):
         listings = items, page_title='Listings by Order', categories = item_categories, 
         possible_orderings = item_orderings, loggedin = ifLoggedIn)
 
-
-
     
 @app.route('/pic/<image>')
 def pic(image):
@@ -388,6 +378,7 @@ def item_page(item_identifier):
             ifLoggedIn = 'username' in session
             return render_template('item_page.html',username=username,listing=updated_listing,
                                 page_title=name, loggedin = ifLoggedIn) 
+
 #creates the feed for the user to view all listings 
 #of items that are not sold
 @app.route("/listings/", methods=['POST','GET'])
@@ -437,14 +428,6 @@ def listings():
                 order = "newest"
                 flash("Listings ordered by when added, from newest to oldest")
                 return redirect(url_for('listings')) #newest to oldest by default 
-        
-                 
-
-
-
-    # price = results['price']
-    # name = results['item_name']
-    # image = results['item_name']
 
 @app.route("/updatelisting/<int:item_identifier>")
 def update_listing(item_identifier):
@@ -487,7 +470,7 @@ def delete_listing(item_identifier):
 
 #Processes users query for a certain item.
 #Handles queries differently based on whether the query has any matches in the database.
-@app.route('/search/') #methods=['POST','GET']?
+@app.route('/search/') 
 def query():
     '''
        Renders search.
@@ -548,8 +531,6 @@ def favorites():
         if 'username' in session:
             conn = dbi.connect()
             results =  listing.get_favorites(conn, 'username')
-            # print("Here is the session username:")
-            # print(session['username'])
             ifLoggedIn = 'username' in session
             return render_template("favorites.html", listings = results, page_title='Favorite items', 
                                     loggedin = ifLoggedIn)
