@@ -1,3 +1,4 @@
+<!--profile page that displays a user's listings-->
 {% extends "base.html" %}
 {% block head_stuff %}
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -15,16 +16,6 @@
       taken from W3 schools image gallery template-->
     <div class="responsive">
       <div class="gallery">
-
-        <!-- CSS switch taken from W3 schools: Not implemented yet. Later, when someone 
-          clicks it, it will save the item to their list of favorite items, and these 
-          favorites of theirs will be recorded in the database. For now, just appears as a 
-          toggle on each item that one can click. Will implement favoriting of items later on. -->
-        <!-- <label class="switch">
-          <input type="checkbox">
-          <span class="slider round"></span>
-        </label> -->
-
         <!-- For now, we are hardcoding the image, since have not  implemented storing the 
           image in the database yet. -->
         <a target="_blank" href="{{url_for('item_page', item_identifier = listing.item_id)}}">
